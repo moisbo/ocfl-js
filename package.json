@@ -13,6 +13,7 @@
     "storage"
   ],
   "author": "Mike Lynch",
+  "repository": "https://github.com/spikelynch/ocfl-js",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "fs-extra": "^7.0.1",
