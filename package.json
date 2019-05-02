@@ -4,7 +4,7 @@
   "description": "Oxford Common File Layout",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require esm"
   },
   "keywords": [
     "ocfl",
@@ -20,5 +20,9 @@
     "hasha": "^3.0.0",
     "lodash": "^4.17.11",
     "through2": "^3.0.0"
+  },
+  "devDependencies": {
+    "esm": "^3.2.22",
+    "mocha": "^6.1.4"
   }
 }
