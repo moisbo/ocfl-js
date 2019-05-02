@@ -10,7 +10,7 @@ function createDirectory(aPath) {
   }
 }
 
-describe('repository creation', function () {
+describe('repository init', function () {
 
   describe('no dir', function () {
     const repoPath = path.join(process.cwd(), './test-data/ocflX');
@@ -39,7 +39,7 @@ describe('repository creation', function () {
 
 const repositoryPath = path.join(process.cwd(), './test-data/ocfl1');
 
-describe('createRepo', function () {
+describe('repository init 2', function () {
   const repositoryPath = path.join(process.cwd(), './test-data/ocfl1');
   const repository = new Repository(repositoryPath);
   createDirectory(repositoryPath);
