@@ -34,5 +34,9 @@ We should probably compare this with efforts in other languages like Python
 
 ## What we've got so far
 
-The inventory function in index.js builds the manifest and OCFL inventory
+- The inventory function in index.js builds the manifest and OCFL inventory
 for a directory.
+
+- The starter of a class Repository
+
+    - test with `npm test`
