@@ -40,7 +40,6 @@ describe('repository init', function () {
 const repositoryPath = path.join(process.cwd(), './test-data/ocfl1');
 
 describe('repository init 2', function () {
-  const repositoryPath = path.join(process.cwd(), './test-data/ocfl1');
   const repository = new Repository(repositoryPath);
   createDirectory(repositoryPath);
 
