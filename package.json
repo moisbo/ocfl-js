@@ -19,8 +19,11 @@
     "fs-extra": "^7.0.1",
     "hasha": "^3.0.0",
     "lodash": "^4.17.11",
+    "pairtree": "0.0.1",
     "shelljs": "^0.8.3",
-    "through2": "^3.0.0"
+    "through2": "^3.0.0",
+    "uuid": "^3.3.2",
+    "uuidv4": "^4.0.0"
   },
   "devDependencies": {
     "esm": "^3.2.22",
