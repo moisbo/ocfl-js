@@ -5,9 +5,10 @@ const Repository = require('../lib/object');
 
 
 function createDirectory(aPath) {
-  if (!fs.existsSync(aPath)) {
-    fs.mkdirSync(aPath);
+  if (fs.existsSync(aPath)) {
+      fs.removeSync(aPath);
   }
+  fs.mkdirSync(aPath);
 }
 
 describe('object init', function () {
@@ -52,14 +53,9 @@ describe('object init 2', function () {
       assert.strictEqual(object.path, objectPath);
     });
     it('should have a namaste file', function () {
-      //create this test path
       assert.strictEqual(fs.existsSync(path.join(objectPath, '0=ocfl_object_1.0')), true);
     });
-    it('should have a v1 dir', function () {
-        //create this test path
-        assert.strictEqual(fs.existsSync(path.join(objectPath, 'v1')), true);
-      });
-    
+ 
    
   } catch (e) {
     assert.notStrictEqual(e, null);
@@ -109,6 +105,17 @@ describe('object with content', function () {
         const inv = JSON.parse(fs.readFileSync(inventoryPath1));
     
         assert.strictEqual(Object.keys(inv.manifest).length, 209);
+      });
+
+      
+      it('should have an inventory digest file', function () {
+        assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
+      });
+      it('should have a V1 inventory file', function () {
+        assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1", "content", 'inventory.json')), true);
+      });
+      it('should have a V1 inventory digest file', function () {
+        assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1", "content", 'inventory.json.sha512')), true);
       });
    
   } catch (e) {
