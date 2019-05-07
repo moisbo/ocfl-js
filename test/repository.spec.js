@@ -9,7 +9,7 @@ function createDirectory(aPath) {
   }
 }
 
-describe('repository init', function () {
+describe('repoInit', function () {
 
   describe('no dir', function () {
     const repoPath = path.join(process.cwd(), './test-data/ocflX');
@@ -20,7 +20,9 @@ describe('repository init', function () {
       } catch (e) {
         assert.strictEqual(e.code, 'ENOENT')
       }
-    })
+
+    });
+   
   });
 
   describe('no init', function () {
@@ -33,7 +35,9 @@ describe('repository init', function () {
         assert.strictEqual(e.message, 'can\'t initialise a directory here as there are already files');
       }
     });
+ 
   });
+
 });
 
 
@@ -45,18 +49,25 @@ describe('repository init 2', function () {
   createDirectory(repositoryPath);
   const sourcePath1 = path.join(process.cwd(), './test-data/ocfl-object1-source');
 
-  try {
+ 
     it('should test content root', async function () {
       const init = await repository.initRepo();
-      assert.strictEqual(repository.version, '1.0');
+      assert.strictEqual(repository.version, '0.1');
     });
     it('should have a namaste', function () {
       assert.strictEqual(repository.path, repositoryPath);
     });
     it('should have a namaste file', function () {
       //create this test path
-      assert.strictEqual(fs.existsSync(path.join(repositoryPath, '0=ocfl_1.0')), true);
+      assert.strictEqual(fs.existsSync(path.join(repositoryPath, '0=ocfl_0.1')), true);
     });
+
+    const repository2 = new Repository(repositoryPath);
+    it('should initialise in a directory with an existing namaste file', async function () {
+      const init = await repository2.initRepo();
+      assert.strictEqual(repository2.version, "0.1")
+    });
+
     it('should use your id for a new object if you give it one', async function(){
       const new_id = await repository.add_object_from_dir(sourcePath1, "some_other_id");
       // We got a UUID as an an ID
@@ -73,7 +84,7 @@ describe('repository init 2', function () {
       const objectPath  = path.join(repositoryPath, new_id.replace(/(..)/g, "$1/"));
       assert.strictEqual(fs.existsSync(objectPath), true);
      });
-     it('should refuse to make an object if there is a dailed attempt in the deposit dir', async function(){
+     it('should refuse to make an object if there is a faiiled attempt in the deposit dir', async function(){
       try {
           const depositDir = await fs.mkdir(path.join(repositoryPath, "deposit", "some_id"));
           const new_id = await repository.add_object_from_dir(sourcePath1, "some_id");
@@ -82,10 +93,19 @@ describe('repository init 2', function () {
         assert.strictEqual(e.message, 'There is already an object with this ID being deposited or left behind after a crash. Cannot proceed.');
       }
      });
+     it('Shold have two objects in it', async function(){
+      const objects = await repository.objects();
+      console.log("GOT OBJECTS", objects)
+      assert.strictEqual(objects.length, 2)
+      
+      //TODO - Check Object IDs
 
-  } catch (e) {
-    assert.notStrictEqual(e, null);
-  }
+
+     });
+
+     // TODO deal with versions (start by refusing to do a a v2)
+
+  
 
 });
 
