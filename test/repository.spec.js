@@ -48,24 +48,25 @@ describe('repository init 2', function () {
   const repository = new Repository(repositoryPath);
   createDirectory(repositoryPath);
   const sourcePath1 = path.join(process.cwd(), './test-data/ocfl-object1-source');
+  const ocflVersion = "1.0";
 
  
     it('should test content root', async function () {
       const init = await repository.initRepo();
-      assert.strictEqual(repository.version, '0.1');
+      assert.strictEqual(repository.ocflVersion, ocflVersion);
     });
     it('should have a namaste', function () {
       assert.strictEqual(repository.path, repositoryPath);
     });
     it('should have a namaste file', function () {
       //create this test path
-      assert.strictEqual(fs.existsSync(path.join(repositoryPath, '0=ocfl_0.1')), true);
+      assert.strictEqual(fs.existsSync(path.join(repositoryPath, '0=ocfl_' + ocflVersion)), true);
     });
 
     const repository2 = new Repository(repositoryPath);
     it('should initialise in a directory with an existing namaste file', async function () {
       const init = await repository2.initRepo();
-      assert.strictEqual(repository2.version, "0.1")
+      assert.strictEqual(repository2.ocflVersion, ocflVersion)
     });
 
     it('should use your id for a new object if you give it one', async function(){
@@ -93,13 +94,12 @@ describe('repository init 2', function () {
         assert.strictEqual(e.message, 'There is already an object with this ID being deposited or left behind after a crash. Cannot proceed.');
       }
      });
-     it('Shold have two objects in it', async function(){
+     it('Should have two objects in it', async function(){
       const objects = await repository.objects();
       console.log("GOT OBJECTS", objects)
       assert.strictEqual(objects.length, 2)
       
       //TODO - Check Object IDs
-
 
      });
 

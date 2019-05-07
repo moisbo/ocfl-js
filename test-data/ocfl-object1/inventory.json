@@ -2,7 +2,7 @@
   "id": "some_id",
   "type": "https://ocfl.io/1.0/spec/#inventory",
   "digestAlgorithm": "sha512",
-  "head": "v1",
+  "head": "v1.0",
   "manifest": {
     "31fd2115617860c10286f0a9c56bd0a3e2c1c63a588da62f2c5fbc71871ceef57192a06c98acb2867233e003d242368364b1a033d3d7edf1248d13340e460c56": [
       "/Users/124411/working/ocfl-js/test-data/ocfl-object1-source/.DS_Store"
