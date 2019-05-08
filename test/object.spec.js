@@ -91,15 +91,14 @@ describe ('version numbering', function() {
 })
 
 
-describe('object with content', function () {
+describe('object with content', async function () {
   const object = new OcflObject(objectPath1);
   const inventoryPath1 = path.join(objectPath1, 'inventory.json');
   const inventoryPath1_v1 = path.join(objectPath1, 'v1', 'inventory.json');
-
+  const repeatedFileHash = "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99"
+  const file1Hash = "4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8db9dfe84c58b2b37b89903a740e1ee172da793a6e79d560e5f7f9bd058a12a280433ed6fa46510a"
   const id = "some_id";
   createDirectory(objectPath1);
-
-  
     it('should test content root', async function () {
       const init = await object.initWithContentFromDir("some_id", sourcePath1);
       assert.strictEqual(object.ocflVersion, '1.0');
@@ -122,23 +121,37 @@ describe('object with content', function () {
 
     it('should have a v1/content dir', function () {
     //create this test path
-    assert.strictEqual(fs.existsSync(path.join(objectPath1, 'v1', 'content')), true);
+        assert.strictEqual(fs.existsSync(path.join(objectPath1, 'v1', 'content')), true);
     });
 
     it('should have a manifest (inventory)', function () {
     //create this test path
-    assert.strictEqual(fs.existsSync(inventoryPath1), true);
+        assert.strictEqual(fs.existsSync(inventoryPath1), true);
     });
 
-    it('should have a manifest (inventory)', function () {
-    //create this test path
-    const inv = JSON.parse(fs.readFileSync(inventoryPath1));
-    assert.strictEqual(Object.keys(inv.manifest).length, 209);
+ 
+
+    it('should have a manifest (inventory) with 209 items in it', async function () {
+        const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+        assert.strictEqual(Object.keys(inv.manifest).length, 209);
+    });
+
+    it('should have file1.txt ', async function() {
+        const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+        assert.strictEqual(inv.manifest[file1Hash][0],"v1/content/sample/lots_of_little_files/file_1.txt");
+        assert.strictEqual(inv.versions["v1"].state[file1Hash][0], "sample/lots_of_little_files/file_1.txt");
+    });
+    
+
+    it('should list 4 copies of file with same content in the manifest and in v1', async function() {
+        const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+        assert.strictEqual(inv.manifest[repeatedFileHash].length,4);
+        assert.strictEqual(inv.versions["v1"].state[repeatedFileHash].length,4);
     });
 
     
     it('should have an inventory digest file', function () {
-    assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
+        assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
     });
 
     // TODO: Put this back in later
