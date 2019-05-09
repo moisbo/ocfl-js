@@ -5,7 +5,7 @@
   "head": "v1",
   "versions": {
     "v1": {
-      "created": "2019-05-08T04:57:09.944Z",
+      "created": "2019-05-09T06:06:14.561Z",
       "state": {
         "0ccd1aebb7434b0234eb99433e2c101d60427b37070769d77a24e314062d8b8439f1ce84ffef7b973c82798064574931800d3b8b5d38198b3bc307e6bdfb1ca3": [
           ".DS_Store"
@@ -652,14 +652,10 @@
       "v1/content/sample/CATALOG.json"
     ],
     "58941214a8334331e52114aab851fc3d8d5da5dd14983f933da8735c24b0ddcac134e8f13692553199c4d9a14a4b3188b62878a30b9d696edda1204666b60837": [
-      "v1/content/sample/lots_of_little_files/.DS_Store",
-      "v1/content/sample/pics/thumbs/.DS_Store"
+      "v1/content/sample/lots_of_little_files/.DS_Store"
     ],
     "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-      "v1/content/sample/lots_of_little_files/file_0-copy1.txt",
-      "v1/content/sample/lots_of_little_files/file_0-copy2.txt",
-      "v1/content/sample/lots_of_little_files/file_0-copy3.txt",
-      "v1/content/sample/lots_of_little_files/file_0.txt"
+      "v1/content/sample/lots_of_little_files/file_0-copy1.txt"
     ],
     "4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8db9dfe84c58b2b37b89903a740e1ee172da793a6e79d560e5f7f9bd058a12a280433ed6fa46510a": [
       "v1/content/sample/lots_of_little_files/file_1.txt"

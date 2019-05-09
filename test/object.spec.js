@@ -58,7 +58,7 @@ describe('object init 2', function () {
     });
 
     it('should be version 0', function () {
-        assert.strictEqual(object.contentVersion, 0);
+        assert.strictEqual(object.contentVersion, null);
       });
 
     it('Should let you access an existing (on disk) object', async function() {
@@ -116,7 +116,7 @@ describe('object with content', async function () {
     });
 
     it('should be version 1', function () {
-       assert.strictEqual(object.contentVersion, 1);
+       assert.strictEqual(object.contentVersion, "v1");
     });
 
     it('should have a v1/content dir', function () {
@@ -129,7 +129,6 @@ describe('object with content', async function () {
         assert.strictEqual(fs.existsSync(inventoryPath1), true);
     });
 
- 
 
     it('should have a manifest (inventory) with 209 items in it', async function () {
         const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
@@ -143,9 +142,9 @@ describe('object with content', async function () {
     });
     
 
-    it('should list 4 copies of file with same content in the manifest and in v1', async function() {
+    it('should list 1 copies of file with same content in the manifest and 4 in v1', async function() {
         const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
-        assert.strictEqual(inv.manifest[repeatedFileHash].length,4);
+        assert.strictEqual(inv.manifest[repeatedFileHash].length, 1);
         assert.strictEqual(inv.versions["v1"].state[repeatedFileHash].length,4);
     });
 
@@ -153,15 +152,14 @@ describe('object with content', async function () {
     it('should have an inventory digest file', function () {
         assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
     });
-
-    // TODO: Put this back in later
-    /* it('should have a V1 inventory file', function () {
-    assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1", "content", 'inventory.json')), true);
+   
+    it('should have a V1 inventory file', function () {
+    assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json')), true);
     });
 
     it('should have a V1 inventory digest file', function () {
-    assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1", "content", 'inventory.json.sha512')), true);
-    }); */
+    assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json.sha512')), true);
+    }); 
    
   
 
