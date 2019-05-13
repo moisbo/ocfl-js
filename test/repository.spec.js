@@ -3,6 +3,9 @@ const path = require('path');
 const fs = require('fs-extra');
 const Repository = require('../lib/repository');
 const OcflObject = require('../lib/object');
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-fs'));
 
 const shell = require("shelljs")
 function createDirectory(aPath) {
@@ -165,7 +168,6 @@ describe('repository init 2', function () {
       assert.strictEqual(inv1.versions["v3"].state[sepiaPicHash], undefined);
 
       // Now put some stuff back
-      console.log(path.join(sourcePath1, "sample","pics"))
       shell.cp("-R", path.join(sourcePath1, "sample","pics"), path.join(sourcePath1_additional_files, "sample"));
       const new_id2 = await repository.add_object_from_dir(sourcePath1_additional_files, test_id);
       const o2 = await object.init();
@@ -187,38 +189,56 @@ describe('repository init 2', function () {
      // TODO deal with versions (start by refusing to do a a v2)
      it('should export', async function(){ 
         // Assume the it function 'should handle file additions' has run and we have an initialized repo in repository
+        const exportDirV4 = path.join("test-data", "exportv4");
+        const exportDirV5 = path.join("test-data", "exportv5");
+
         const exportDirV1 = path.join("test-data", "exportv1");
-        const rmf = await fs.remove(exportDirV1);
+
+        const rmf1 = await fs.remove(exportDirV1);
+        const rmf4 = await fs.remove(exportDirV4);
+        const rmf5 = await fs.remove(exportDirV5);
+
 
         const testId = "id";
         
         try {
-          const init = await repository.export(testId, exportDirV1); 
+          const init = await repository.export(testId, exportDirV4); 
         } catch (e) {
           assert.strictEqual(e.message, "Can't export as the directory does not exist.");
         }
-        const fl = await fs.writeFile(exportDirV1, "");
+
+        const fl = await fs.writeFile(exportDirV4, "");
         try {
-          const init = await repository.export(testId, exportDirV1); 
+          const init = await repository.export(testId, exportDirV4); 
         } catch (e) {
           assert.strictEqual(e.message, "Can't export to an existing file.");
         }
-        const rmf1 = await fs.remove(exportDirV1);
+        const rmf4a = await fs.remove(exportDirV4);
 
-        const newv1 = await fs.mkdir(exportDirV1);
-        const init = await repository.export(testId, exportDirV1); 
+        const new41 = await fs.mkdir(exportDirV4);
+        const xp4 = await repository.export(testId, exportDirV4); 
 
-        // TODO: test what to do if it contains something
+        expect(exportDirV4).to.be.a.directory().and.deep.equal(sourcePath1_additional_files, "Matches the stuff that was imported");
+
 
         try {
-          const init = await repository.export(testId, exportDirV1); 
+          const init = await repository.export(testId, exportDirV4); 
         } catch (e) {
-          assert.strictEqual(e.message, "Can't export to an existing file.");
+          assert.strictEqual(e.message, "Can't export as the directory has stuff in it.");
         }
         //assert.strictEqual(false,true); // exported content is the same as /test-data/sourcePath1_additional_files'
 
+        const new1 = await fs.mkdir(exportDirV1);
+        const xp1  = await repository.export(testId, exportDirV1, {version: "v1"}); 
+        expect(exportDirV1).to.be.a.directory().and.deep.equal(sourcePath1, "Matches the stuff that was imported");
 
-        
+        const new5 = await fs.mkdir(exportDirV5);
+
+        try {
+          const init = await repository.export(testId, exportDirV5, {version: "v5"}); 
+        } catch (e) {
+          assert.strictEqual(e.message, "Can't export a version that doesn't exist.");
+        }
      });
 
 });
