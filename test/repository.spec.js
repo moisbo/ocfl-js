@@ -132,8 +132,7 @@ describe('repository init 2', function () {
       fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file1.txt"), "$T)(*SKGJKVJS DFKJs");
       fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file2.txt"), "$T)(*SKGJKdfsfVJS DFKJs");
     
-      const 
-      init = await repository.initRepo();
+      const init = await repository.initRepo();
       const test_id = "id";
       const id = await repository.add_object_from_dir(sourcePath1, test_id);
       const new_id = await repository.add_object_from_dir(sourcePath1_additional_files, test_id);
@@ -185,14 +184,43 @@ describe('repository init 2', function () {
       assert.strictEqual(fs.existsSync(path.join(object.path,"v2","content")), true);
      });
 
-
-
      // TODO deal with versions (start by refusing to do a a v2)
+     it('should export', async function(){ 
+        // Assume the it function 'should handle file additions' has run and we have an initialized repo in repository
+        const exportDirV1 = path.join("test-data", "exportv1");
+        const rmf = await fs.remove(exportDirV1);
 
-  
+        const testId = "id";
+        
+        try {
+          const init = await repository.export(testId, exportDirV1); 
+        } catch (e) {
+          assert.strictEqual(e.message, "Can't export as the directory does not exist.");
+        }
+        const fl = await fs.writeFile(exportDirV1, "");
+        try {
+          const init = await repository.export(testId, exportDirV1); 
+        } catch (e) {
+          assert.strictEqual(e.message, "Can't export to an existing file.");
+        }
+        const rmf1 = await fs.remove(exportDirV1);
+
+        const newv1 = await fs.mkdir(exportDirV1);
+        const init = await repository.export(testId, exportDirV1); 
+
+        // TODO: test what to do if it contains something
+
+        //assert.strictEqual(false,true); // exported content is the same as /test-data/sourcePath1_additional_files'
+
+
+        
+     });
 
 });
 
+
+
 after(function () {
   //TODO: destroy test repoPath
+
 });
