@@ -210,6 +210,11 @@ describe('repository init 2', function () {
 
         // TODO: test what to do if it contains something
 
+        try {
+          const init = await repository.export(testId, exportDirV1); 
+        } catch (e) {
+          assert.strictEqual(e.message, "Can't export to an existing file.");
+        }
         //assert.strictEqual(false,true); // exported content is the same as /test-data/sourcePath1_additional_files'
 
 
