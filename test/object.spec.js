@@ -33,7 +33,7 @@ describe('object init', function () {
       try {
         const init = await object.init();
       } catch (e) {
-        assert.strictEqual(e.message, 'can\'t initialise a directory here as there are already files');
+        assert.strictEqual(e.message, 'can\'t initialise an object here as there are already files');
       }
     });
   });

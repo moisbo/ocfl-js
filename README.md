@@ -1,42 +1,52 @@
-# README
+# About
 
-## Planned API
+This is a pre-alpha nodejs library implement the (emerging) Oxford Common File Layout specification.
 
-Here's an outline:
+# Audience
 
-	ocfl = require('ocfl');
+This is for Javascript/Nodejs developers who know how to work with asyncronous
+libraries. Until we build up a proper set of examples and documentation, the [tests](./test)
+and [demo](./demo.js) script show how to use the library.
 
-    # object representing a repository
+# Status
 
- 	const repo = new ocfl.repo(MY_REPOSITORY_URI)
+This is pre-alpha code which works but is not a complete implementation of the spec.
 
-    # objects: a list of URIs for each of the repo's contents
+What's working:
+-  Initialising a new (in an exsiting empty directory) or existing OCFL repository of version 1.0.
+-  Adding content from a directory to the the repository with an ID - the repository can store OCFL objects using Pairtree.
+-  Adding a new version of an object be inporting a new directory with the same ID.
+-  List all objects
 
-	const objects = await repo.objects();
+# Installation
 
-	# object: look up a single object and return an object
-	# which has its OCFL metadata
+## Install via git
 
- 	const object = await repo.object(MY_OBJECT_URI);
+1. Get the code:
+  ```git clone https://github.com/UTS-eResearch/ocfl-js.git```
+2. Install it
+	```
+	cd ocfl-js
+	npm install .
+	```
+3. Check that it works, but running the the tests
+	```
+	mocha
+	```
 
-    # Add a directory with files in to the repository. This
-    # should either build the manifest with hashes, or, if it's
-    # a BagIt bag, get the hashes from the bag
+Running the tests will create an example repository in ./test-data called `ocfl1` with a single item in it with 4 versions.
 
- 	const new_object = await repo.add_object(dir);
-
- 	# This updates an object: adds the directory as a second version
- 	# and returns a js object representing the new object
-
- 	const versioned_object = await repo.update_object(MY_OBJECT_URI, dir);
-
-We should probably compare this with efforts in other languages like Python
 
 ## What we've got so far
 
-- The inventory function in index.js builds the manifest and OCFL inventory
-for a directory.
+Some tests. Run them with:
+    mocha
 
-- The starter of a class Repository
+A [demo](./demo.js) script that shows usage - how to intialise a repository (in
+an empty directory) and add some simple file based content, then export all (two
+of) the objects in the repository in all their versions.
 
-    - test with `npm test`
+Run the demo by typing:
+   node demo.js
+
+Inspect the output in `demo/export`
