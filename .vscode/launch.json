@@ -3,14 +3,13 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [      
         {
             "type": "node",
             "request": "launch",
             "name": "test repository",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
-                "--file", 
                 "${workspaceFolder}/test/repository.spec.js"
             ],
             "console": "integratedTerminal",
@@ -22,9 +21,17 @@
             "name": "test ocflObject",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
-                "--file", 
-                "${workspaceFolder}/test/object.spec.js"
+                "${workspaceFolder}/test/ocflObject.spec.js"
             ],
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "test ocflObject streams",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "${workspaceFolder}/test/ocflObject.streams.spec.js"
+            ]
         }
     ]
-}a
+}

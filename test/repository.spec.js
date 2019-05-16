@@ -2,7 +2,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs-extra');
 const Repository = require('../lib/repository');
-const OcflObject = require('../lib/object');
+const OcflObject = require('../lib/ocflObject');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-fs'));

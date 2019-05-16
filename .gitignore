@@ -1,3 +1,8 @@
 node_modules
 .DS_Store
 .idea
+test-data/exportv1
+test-data/exportv4
+test-data/ocfl-object1
+test-data/ocfl1
+test-data/streams
