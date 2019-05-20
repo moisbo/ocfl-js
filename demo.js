@@ -19,8 +19,8 @@ async function demo() {
   }
   const dir = await fs.mkdir(demoRepoPath);
   // Make a new repository and initialise it
-  var repo = await new OCFLRepository(demoRepoPath);
-  var init = await repo.initRepo();
+  var repo = await new OCFLRepository();
+  var init = await repo.create(demoRepoPath);
 
   // Make up some content
   const c = await fs.remove(demoContentPath);
@@ -33,12 +33,12 @@ async function demo() {
   const emp = await fs.mkdir(subDir);
 
   // Add demoContentPath to the repository 
-  const new_object1 = await repo.add_object_from_dir(demoContentPath, demoObjectID1);
+  const new_object1 = await repo.importNewObject(demoContentPath, demoObjectID1);
   var inv1 = await new_object1.getInventory();
   console.log("Head version of object 1", inv1.head);
   console.log("Object 1 has this many files", Object.keys(inv1.versions[inv1.head].state).length)
 
-  const new_object2 = await repo.add_object_from_dir(demoContentPath, demoObjectID2);
+  const new_object2 = await repo.importNewObject(demoContentPath, demoObjectID2);
 
   var inv1 = await new_object1.getInventory();
 
@@ -55,14 +55,14 @@ async function demo() {
 
 
   console.log("Re-add the demo directory to object1");
-  const new_object1v1 = await repo.add_object_from_dir(demoContentPath, demoObjectID1);
+  const new_object1v1 = await repo.importNewObject(demoContentPath, demoObjectID1);
   inv1 = await new_object1.getInventory();
 
   console.log("Head version of object 1:", inv1.head);
   console.log("Object 1 has this many files:", Object.keys(inv1.versions[inv1.head].state).length)
   console.log("Removing file3.txt from the content");
   const rmf3 = await fs.remove(path.join(demoContentPath, "file3.txt"));
-  const new_object1v3 = await repo.add_object_from_dir(demoContentPath, demoObjectID1);
+  const new_object1v3 = await repo.importNewObject(demoContentPath, demoObjectID1);
   inv1 = await new_object1.getInventory();
   console.log("Head version of object 1:", inv1.head);
   console.log("Object 1 has this many files:", Object.keys(inv1.versions[inv1.head].state).length)
@@ -86,8 +86,7 @@ async function demo() {
   const promises = objects.map((o) => exportVersions(o));
   await Promise.all(promises);
 
-  // List objects
-
+ 
 }
 
 demo().then(() => { console.log("done") })

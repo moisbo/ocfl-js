@@ -22,10 +22,10 @@ describe('from path get an object', async function () {
       const objPath = path.join(testDataPath, 'obj');
       fs.ensureDirSync(objPath);
       fs.writeFileSync(filePath, '{what:{is:{a:"test"}}}');
-      const obj = new OcflObject(objPath);
-      const objIni = await obj.init();
+      const obj = new OcflObject();
+      const objIni = await obj.create(objPath);
       //add content
-      const initWithContent = await obj.initWithContentFromDir("some_id", sampleDir);
+      const initWithContent = await obj.importDir("some_id", sampleDir);
       //compare object
       //path relative to the object
       const objFilePath = await obj.getFilePath(fileName);

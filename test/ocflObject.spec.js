@@ -15,11 +15,11 @@ function createDirectory(aPath) {
 describe('object init', function () {
 
   describe('no dir', function () {
-    const repoPath = path.join(process.cwd(), './test-data/ocfl_obj_test');
-    const object = new OcflObject(repoPath);
+    const objPath = path.join(process.cwd(), './test-data/ocfl_obj_test');
+    const object = new OcflObject();
     it('should test directory', async function f() {
       try {
-        const init = await object.init();
+        const init = await object.create(objPath);
       } catch (e) {
         assert.strictEqual(e.code, 'ENOENT')
       }
@@ -27,11 +27,11 @@ describe('object init', function () {
   });
 
   describe('no init', function () {
-    const repoPath = path.join(process.cwd(), './test-data/notocfl');
-    const object = new OcflObject(repoPath);
-    it('should not initialise directories with files', async function () {
+    const objPath = path.join(process.cwd(), './test-data/notocfl');
+    const object = new OcflObject();
+    it('should not create an object in directories with files', async function () {
       try {
-        const init = await object.init();
+        const init = await object.create(objPath);
       } catch (e) {
         assert.strictEqual(e.message, 'can\'t initialise an object here as there are already files');
       }
@@ -42,12 +42,12 @@ describe('object init', function () {
 const objectPath = path.join(process.cwd(), './test-data/ocfl-object');
 
 describe('object init 2', function () {
-  const object = new OcflObject(objectPath);
+  const object = new OcflObject();
   createDirectory(objectPath);
 
   try {
     it('should test content root', async function () {
-      const init = await object.init();
+      const init = await object.create(objectPath);
       assert.strictEqual(object.ocflVersion, '1.0');
     });
     it('should have a path', function () {
@@ -62,12 +62,11 @@ describe('object init 2', function () {
       });
 
     it('Should let you access an existing (on disk) object', async function() {
-        const object2 = await new OcflObject(objectPath);
-        const init = await object2.init();
+        const object2 = new OcflObject();
+        const init = await object2.load(objectPath);
 
     });
    
-
   } catch (e) {
     console.log(e);
     assert.notStrictEqual(e, null);
@@ -81,7 +80,7 @@ const sourcePath1 = path.join(process.cwd(), './test-data/ocfl-object1-source');
 
 describe ('version numbering', function() {
     //Helper functions
-    const object = new OcflObject(objectPath1);
+    const object = new OcflObject();
 
     it("should know how to increment versions", function() {
         assert.strictEqual("v1", object.getVersionString(1));
@@ -92,7 +91,8 @@ describe ('version numbering', function() {
 
 
 describe('object with content', async function () {
-  const object = new OcflObject(objectPath1);
+  const object = new OcflObject();
+  const objectPath1 = path.join(process.cwd(), './test-data/ocfl-object1');
   const inventoryPath1 = path.join(objectPath1, 'inventory.json');
   const inventoryPath1_v1 = path.join(objectPath1, 'v1', 'inventory.json');
   const repeatedFileHash = "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99"
@@ -100,7 +100,8 @@ describe('object with content', async function () {
   const id = "some_id";
   createDirectory(objectPath1);
     it('should test content root', async function () {
-      const init = await object.initWithContentFromDir("some_id", sourcePath1);
+      const create = await object.create(objectPath1);
+      const init = await object.importDir("some_id", sourcePath1);
       assert.strictEqual(object.ocflVersion, '1.0');
     });
     it('should have a namaste', function () {
@@ -166,7 +167,7 @@ describe('object with content', async function () {
 });
 
 after(function () {
-  //TODO: destroy test repoPath
+  //TODO: destroy test objPath
   fs.removeSync(objectPath);
   //fs.removeSync(objectPath1);
 });

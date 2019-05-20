@@ -18,10 +18,10 @@ describe('repoInit', function () {
 
   describe('no dir', function () {
     const repoPath = path.join(process.cwd(), './test-data/ocflX');
-    const repository = new Repository(repoPath);
+    const repository = new Repository();
     it('should test directory', async function f() {
       try {
-        const init = await repository.initRepo();
+        const init = await repository.create(repoPath);
       } catch (e) {
         assert.strictEqual(e.code, 'ENOENT')
       }
@@ -32,10 +32,10 @@ describe('repoInit', function () {
 
   describe('no init', function () {
     const repoPath = path.join(process.cwd(), './test-data/notocfl');
-    const repository = new Repository(repoPath);
+    const repository = new Repository();
     it('should not initialise directories with files', async function () {
       try {
-        const init = await repository.initRepo();
+        const init = await repository.create(repoPath);
       } catch (e) {
         assert.strictEqual(e.message, 'can\'t initialise a directory here as there are already files');
       }
@@ -48,8 +48,9 @@ describe('repoInit', function () {
 
 describe('repository init 2', function () {
   const repositoryPath = path.join(process.cwd(), './test-data/ocfl1');
+  const repository = new Repository();
+  const l = repository.create(repositoryPath);
 
-  const repository = new Repository(repositoryPath);
   const sourcePath1 = path.join(process.cwd(), './test-data/ocfl-object1-source');
   const sourcePath1_additional_files = sourcePath1 + "_additional_files";
   const repeatedFileHash = "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99";
@@ -63,12 +64,13 @@ describe('repository init 2', function () {
   it('should test content root', async function () {
     fs.removeSync(repositoryPath);
     createDirectory(repositoryPath);
-    const init = await repository.initRepo();
-
+    const repository = new Repository();
+    const init = await repository.create(repositoryPath);
     assert.strictEqual(repository.ocflVersion, ocflVersion);
   });
 
-  it('should have a namaste', function () {
+  it('should have a namaste', async function () {
+    const a = await repository.load(repositoryPath);
     assert.strictEqual(repository.path, repositoryPath);
   });
   it('should have a namaste file', function () {
@@ -76,14 +78,14 @@ describe('repository init 2', function () {
     assert.strictEqual(fs.existsSync(path.join(repositoryPath, '0=ocfl_' + ocflVersion)), true);
   });
 
-  const repository2 = new Repository(repositoryPath);
+  const repository2 = new Repository();
   it('should initialise in a directory with an existing namaste file', async function () {
-    const init = await repository2.initRepo();
+    const init = await repository2.load(repositoryPath);
     assert.strictEqual(repository2.ocflVersion, ocflVersion)
   });
 
   it('should use your id for a new object if you give it one', async function () {
-    const obj = await repository.add_object_from_dir(sourcePath1, "some_other_id");
+    const obj = await repository2.importNewObject(sourcePath1, "some_other_id");
     // We got a UUID as an an ID
     const inv = await (obj.getInventory());
     assert.strictEqual(inv.id, "some_other_id");
@@ -94,7 +96,7 @@ describe('repository init 2', function () {
 
 
   it('should make up an ID if you add content', async function () {
-    const obj = await repository.add_object_from_dir(sourcePath1);
+    const obj = await repository.importNewObject(sourcePath1);
     const inv = await (obj.getInventory());
     const new_id = inv.id;
     // We got a UUID as an an ID
@@ -110,16 +112,17 @@ describe('repository init 2', function () {
   it('should refuse to make an object if there is a faiiled attempt in the deposit dir', async function () {
     try {
       const depositDir = await fs.mkdir(path.join(repositoryPath, "deposit", "some_id"));
-      const new_id = await repository.add_object_from_dir(sourcePath1, "some_id");
+      const new_id = await repository.importNewObject(sourcePath1, "some_id");
     }
     catch (e) {
       assert.strictEqual(e.message, 'There is already an object with this ID being deposited or left behind after a crash. Cannot proceed.');
     }
+
   });
 
-  it('Should have three objects in it', async function () {
+  it('Should have two objects in it', async function () {
     const objects = await repository.objects();
-    assert.strictEqual(objects.length, 3)
+    assert.strictEqual(objects.length, 2)
 
     //TODO - Check Object IDs
 
@@ -128,8 +131,14 @@ describe('repository init 2', function () {
 
 
   it('should handle file additions', async function () {
-    fs.removeSync(repositoryPath);
-    createDirectory(repositoryPath);
+    // TODO this depends on tests above running - fix that!
+   
+    const repository = new Repository();
+    const i = repository.load(repositoryPath);
+  
+
+
+
     fs.removeSync(sourcePath1_additional_files);
     shell.cp("-R", sourcePath1, sourcePath1_additional_files);
     // Add some identical additional files
@@ -138,10 +147,12 @@ describe('repository init 2', function () {
     fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file1.txt"), "$T)(*SKGJKVJS DFKJs");
     fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file2.txt"), "$T)(*SKGJKdfsfVJS DFKJs");
 
-    const init = await repository.initRepo();
     const test_id = "id";
-    const id = await repository.add_object_from_dir(sourcePath1, test_id);
-    const obj = await repository.add_object_from_dir(sourcePath1_additional_files, test_id);
+    const id = await repository.importNewObject(sourcePath1, test_id);
+    const obj = await repository.importNewObject(sourcePath1_additional_files, test_id);
+
+
+
     const inv3 = await obj.getInventory();
     const new_id = inv3.id;
     assert.strictEqual(new_id, test_id);
@@ -149,21 +160,19 @@ describe('repository init 2', function () {
     const objectPath = path.join(repositoryPath, new_id.replace(/(..)/g, "$1/"));
     assert.strictEqual(fs.existsSync(objectPath), true);
     // Check that it's v2
-    const object = new OcflObject(objectPath);
-    const o = await object.init();
+    const object = new OcflObject();
+    const o = await object.load(objectPath);
     const inv = await object.getInventory();
 
-    assert.strictEqual(object.contentVersion, "v2");
-    assert.strictEqual(inv.versions["v2"].state[repeatedFileHash].length, 4);
+   assert.strictEqual(inv.versions["v2"].state[repeatedFileHash].length, 4);
     assert.strictEqual(inv.versions["v2"].state[repeatedFileHash].indexOf("sample/lots_of_little_files/file_0-copy1.txt") > -1, true);
 
     // Now delete some stuff 
     const rm = await fs.remove(path.join(sourcePath1_additional_files, "sample", "pics"));
-    const new_id1 = await repository.add_object_from_dir(sourcePath1_additional_files, test_id);
+    const new_id1 = await repository.importNewObject(sourcePath1_additional_files, test_id);
     // Re-initialize exsiting object
-    const o1 = await object.init();
+    const o1 = await object.load(objectPath);
     const inv1 = await object.getInventory();
-    assert.strictEqual(object.contentVersion, "v3");
     assert.strictEqual(Object.keys(inv1.manifest).length, 211);
     assert.strictEqual(inv1.manifest[sepiaPicHash][0], sepiaPicPath);
     // Sepia pic is v2
@@ -173,10 +182,8 @@ describe('repository init 2', function () {
 
     // Now put some stuff back
     shell.cp("-R", path.join(sourcePath1, "sample", "pics"), path.join(sourcePath1_additional_files, "sample"));
-    const new_id2 = await repository.add_object_from_dir(sourcePath1_additional_files, test_id);
-    const o2 = await object.init();
+    const new_id2 = await repository.importNewObject(sourcePath1_additional_files, test_id);
     const inv2 = await object.getInventory();
-    assert.strictEqual(object.contentVersion, "v4");
     assert.strictEqual(Object.keys(inv1.manifest).length, 211);
     assert.strictEqual(inv2.manifest[sepiaPicHash][0], sepiaPicPath);
     // Sepia pic is v2
