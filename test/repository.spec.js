@@ -16,23 +16,25 @@ function createDirectory(aPath) {
 
 describe('repoInit', function () {
 
-  describe('no dir', function () {
-    const repoPath = path.join(process.cwd(), './test-data/ocflX');
-    const repository = new Repository();
-    it('should test directory', async function f() {
-      try {
-        const init = await repository.create(repoPath);
-      } catch (e) {
-        assert.strictEqual(e.code, 'ENOENT')
-      }
 
-    });
-
-  });
 
   describe('no init', function () {
     const repoPath = path.join(process.cwd(), './test-data/notocfl');
     const repository = new Repository();
+
+    describe('No directory to create a repo in', function () {
+      const repoPath = path.join(process.cwd(), './test-data/ocflX');
+      const repository = new Repository();
+      it('should test directory', async function f() {
+        try {
+          const init = await repository.create(repoPath);
+        } catch (e) {
+          assert.strictEqual(e.code, 'ENOENT')
+        }
+  
+      });
+  
+    });
     it('should not initialise directories with files', async function () {
       try {
         const init = await repository.create(repoPath);
@@ -69,10 +71,10 @@ describe('repository init 2', function () {
     assert.strictEqual(repository.ocflVersion, ocflVersion);
   });
 
-  it('should have a namaste', async function () {
-    const a = await repository.load(repositoryPath);
+  it('repo path is set', async function () {
     assert.strictEqual(repository.path, repositoryPath);
   });
+
   it('should have a namaste file', function () {
     //create this test path
     assert.strictEqual(fs.existsSync(path.join(repositoryPath, '0=ocfl_' + ocflVersion)), true);
@@ -128,6 +130,15 @@ describe('repository init 2', function () {
 
   });
 
+  it('Should not let you load twice', async function () {
+    try {
+      const new_id = await repository.load(repositoryPath);
+    }
+    catch (e) {
+      assert.strictEqual(e.message, 'This repository has already been initialized at: /Users/124411/working/ocfl-js/test-data/ocfl1');
+    }
+
+  });
 
 
   it('should handle file additions', async function () {
@@ -171,7 +182,6 @@ describe('repository init 2', function () {
     const rm = await fs.remove(path.join(sourcePath1_additional_files, "sample", "pics"));
     const new_id1 = await repository.importNewObject(sourcePath1_additional_files, test_id);
     // Re-initialize exsiting object
-    const o1 = await object.load(objectPath);
     const inv1 = await object.getInventory();
     assert.strictEqual(Object.keys(inv1.manifest).length, 211);
     assert.strictEqual(inv1.manifest[sepiaPicHash][0], sepiaPicPath);

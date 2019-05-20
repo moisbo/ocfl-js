@@ -19,7 +19,7 @@ async function demo() {
   }
   const dir = await fs.mkdir(demoRepoPath);
   // Make a new repository and initialise it
-  var repo = await new OCFLRepository();
+  var repo = new OCFLRepository();
   var init = await repo.create(demoRepoPath);
 
   // Make up some content
@@ -51,7 +51,7 @@ async function demo() {
   // Add something to our empty dir
   const f3 = await fs.writeFile(path.join(subDir, "file4.txt"), "yet more content");
   var objects = await repo.objects();
-  console.log("We have this many objects:", objects.length);
+  console.log("Repo has this many objects:", objects.length);
 
 
   console.log("Re-add the demo directory to object1");
@@ -86,7 +86,18 @@ async function demo() {
   const promises = objects.map((o) => exportVersions(o));
   await Promise.all(promises);
 
+
+  // Now make a new repository object pointing to the same path we created above
+  var repo2 = new OCFLRepository();
+
+  // This will throw an error as there's already a repo there
+  // var init = await repo2.create(demoRepoPath);
  
+  // This will throw an error as there's already a repo there
+  var init = await repo2.load(demoRepoPath);
+  var objects2 = await repo2.objects();
+  console.log("Repo 2 has this many objects:", Object.keys(objects).length);
+
 }
 
 demo().then(() => { console.log("done") })
