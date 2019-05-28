@@ -13,7 +13,7 @@
     "storage"
   ],
   "author": "Mike Lynch",
-  "repository": "https://github.com/spikelynch/ocfl-js",
+  "repository": "https://github.com/UTS-eResearch/ocfl-js",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "chai": "^4.2.0",
