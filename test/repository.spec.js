@@ -7,7 +7,6 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-fs'));
 
-const shell = require("shelljs")
 function createDirectory(aPath) {
   if (!fs.existsSync(aPath)) {
     fs.mkdirSync(aPath);
@@ -170,7 +169,7 @@ describe('Adding objects', function () {
     const i = repository.load(repositoryPath);
 
     fs.removeSync(sourcePath1_additional_files);
-    shell.cp("-R", sourcePath1, sourcePath1_additional_files);
+    fs.copySync(sourcePath1, sourcePath1_additional_files);
     // Add some identical additional files
 
     // Add some new additional files
@@ -211,7 +210,7 @@ describe('Adding objects', function () {
     assert.strictEqual(inv1.versions["v3"].state[sepiaPicHash], undefined);
 
     // Now put some stuff back
-    shell.cp("-R", path.join(sourcePath1, "sample", "pics"), path.join(sourcePath1_additional_files, "sample"));
+    fs.copySync(path.join(sourcePath1, "sample", "pics"), path.join(sourcePath1_additional_files, "sample"));
     const new_id2 = await repository.importNewObject(sourcePath1_additional_files, test_id);
     const inv2 = await object.getInventory();
     assert.strictEqual(Object.keys(inv1.manifest).length, 211);
