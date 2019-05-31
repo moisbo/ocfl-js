@@ -164,7 +164,6 @@ describe('Adding objects', function () {
 
   it('should handle file additions and export', async function () {
     // TODO this depends on tests above running - fix that!
-   
     const repository = new Repository();
     const i = repository.load(repositoryPath);
 

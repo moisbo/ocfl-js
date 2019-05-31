@@ -3,6 +3,10 @@ const path = require('path');
 const fs = require('fs-extra');
 const OcflObject = require('../lib/ocflObject');
 
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-fs'));
+
 
 
 function createDirectory(aPath) {
@@ -111,30 +115,50 @@ describe('object with content', async function () {
       //create this test path
       assert.strictEqual(fs.existsSync(path.join(objectPath1, '0=ocfl_object_1.0')), true);
     });
+
     it('should have a v1 dir', function () {
         //create this test path
-        assert.strictEqual(fs.existsSync(path.join(objectPath1, 'v1')), true);
+        expect(path.join(objectPath1, 'v1')).to.be.a.directory("v1 dir");
     });
 
     it('should be version 1', function () {
        assert.strictEqual(object.contentVersion, "v1");
     });
 
+    const contentPath = path.join(objectPath1, 'v1', 'content');
+
     it('should have a v1/content dir', function () {
     //create this test path
-        assert.strictEqual(fs.existsSync(path.join(objectPath1, 'v1', 'content')), true);
+      expect(contentPath).to.be.a.directory("v1/content dir");
     });
 
     it('should have a manifest (inventory)', function () {
     //create this test path
-        assert.strictEqual(fs.existsSync(inventoryPath1), true);
+      expect(inventoryPath1).to.be.a.file("inventory.json is a file");
     });
-
 
     it('should have a manifest (inventory) with 209 items in it', async function () {
         const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
         assert.strictEqual(Object.keys(inv.manifest).length, 209);
     });
+
+
+    it("object has same directory structure as source", function () {
+      expect(contentPath).to.to.be.a.directory().and.deep.equal(sourcePath1, "ocfl content has original directory structure");
+    });   
+
+    it("has copied all the contents of the source to the object", function () {
+      expect(sourcePath1).to.be.a.directory("is a dir").with.deep.files.that.satisfy((files) => {
+        return files.every((file) => {
+          const fixture_file = path.join(sourcePath1, file);
+          const output_file = path.join(contentPath, file);
+          expect(output_file).to.be.a.file(`file ${output_file}`).and.equal(fixture_file, `${output_file} content matches`);
+          return true;
+        })
+      })
+    });
+
+
 
     it('should have file1.txt ', async function() {
         const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
