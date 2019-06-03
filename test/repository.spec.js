@@ -114,7 +114,7 @@ describe('Adding objects', function () {
 
   it('should make up an ID if you add content', async function () {
     const repository = await createTestRepo();
-    const obj = await repository.importNewObject(sourcePath1);
+    const obj = await repository.importNewObject(null, sourcePath1);
     const inv = await (obj.getInventory());
     const new_id = inv.id;
     // We got a UUID as an an ID
@@ -126,7 +126,7 @@ describe('Adding objects', function () {
 
   it('should use your id for a new object if you give it one', async function () {
     const repository = await createTestRepo();
-    const obj = await repository.importNewObject(sourcePath1, "some_other_id");
+    const obj = await repository.importNewObject("some_other_id", sourcePath1);
     // We got a UUID as an an ID
     const inv = await (obj.getInventory());
     assert.strictEqual(inv.id, "some_other_id");
@@ -140,7 +140,7 @@ describe('Adding objects', function () {
     const repository = await createTestRepo();
     try {
       const depositDir = await fs.mkdirp(path.join(repositoryPath, "deposit", "some_id"));
-      const new_id = await repository.importNewObject(sourcePath1, "some_id");
+      const new_id = await repository.importNewObject("some_id", sourcePath1);
     }
     catch (e) {
       assert.strictEqual(e.message, 'There is already an object with this ID being deposited or left behind after a crash. Cannot proceed.');
@@ -150,9 +150,9 @@ describe('Adding objects', function () {
 
   it('Should now have three objects in it', async function () {
     const repository = await createTestRepo();
-    const obj1 = await repository.importNewObject(sourcePath1, "1");
-    const obj2 = await repository.importNewObject(sourcePath1, "2");
-    const obj3 = await repository.importNewObject(sourcePath1, "3");
+    const obj1 = await repository.importNewObject("1", sourcePath1);
+    const obj2 = await repository.importNewObject("2", sourcePath1);
+    const obj3 = await repository.importNewObject("3", sourcePath1);
 
     const objects = await repository.objects();
     assert.strictEqual(objects.length, 3)
@@ -161,7 +161,7 @@ describe('Adding objects', function () {
 
   });
 
-    // TODO: break this into smaller it()s and fix the 211 magic number 
+    // TODO: break this into smaller it()s and fix the 211 magic number bug
 
   it.skip('should handle file additions and export', async function () {
     // TODO this depends on tests above running - fix that!
@@ -177,8 +177,8 @@ describe('Adding objects', function () {
     fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file2.txt"), "$T)(*SKGJKdfsfVJS DFKJs");
 
     const test_id = "id";
-    const id = await repository.importNewObject(sourcePath1, test_id);
-    const obj = await repository.importNewObject(sourcePath1_additional_files, test_id);
+    const id = await repository.importNewObject(test_id, sourcePath1);
+    const obj = await repository.importNewObject(test_id, sourcePath1_additional_files);
 
 
 
@@ -198,7 +198,7 @@ describe('Adding objects', function () {
 
     // Now delete some stuff 
     const rm = await fs.remove(path.join(sourcePath1_additional_files, "sample", "pics"));
-    const new_id1 = await repository.importNewObject(sourcePath1_additional_files, test_id);
+    const new_id1 = await repository.importNewObject(test_id, sourcePath1_additional_files);
 
     // Re-initialize exsiting object
     const inv1 = await object.getInventory();

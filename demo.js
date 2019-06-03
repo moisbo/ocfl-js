@@ -1,9 +1,11 @@
 // Simple Demo script to show usage
+
 const path = require('path');
 const fs = require('fs-extra');
 const OCFLRepository = require('./lib/repository');
 
 // This is an asynchronous library so you need to call using await, or use promises
+
 async function demo() {
 
   const demoRepoPath = path.join("demo", "repo");
