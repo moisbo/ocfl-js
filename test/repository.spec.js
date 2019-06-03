@@ -1,6 +1,8 @@
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs-extra');
+const uuidv4 = require('uuidv4');
+const pairtree = require('pairtree');
 const Repository = require('../lib/repository');
 const OcflObject = require('../lib/ocflObject');
 const chai = require('chai');
@@ -27,7 +29,7 @@ async function createTestRepo() {
   return repository;
 }
 
-describe('repository intitialisation', function () {
+describe('repository initialisation', function () {
 
     it('should not initialise previous created or loaded repositories', async function () {
       const repository = await createTestRepo();
@@ -100,6 +102,7 @@ describe('Successful repository creation', function () {
     assert.strictEqual(repository2.ocflVersion, ocflVersion)
   });
 
+
 });
 
 describe('Adding objects', function () {
@@ -133,6 +136,16 @@ describe('Adding objects', function () {
     // Check  that the object is there
     const objectPath = path.join(repositoryPath, inv.id.replace(/(..)/g, "$1/"));
     assert.strictEqual(fs.existsSync(objectPath), true);
+  });
+
+  it('should create a deposit directory in the repository path', async function () {
+    const repository = await createTestRepo();
+    const id = uuidv4();
+    const idpath = repository.objectIdToPath(id).replace(/\//g, "");
+    const epath = path.join(repository.path, "deposit", idpath);
+    const gpath = await repository.makeDepositPath(id);
+    expect(gpath).to.equal(epath);
+    expect(gpath).to.be.a.directory(`Created ${gpath}`).and.empty;
   });
 
 
