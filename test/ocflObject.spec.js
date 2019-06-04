@@ -1,7 +1,11 @@
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs-extra');
+const hasha = require('hasha');
 const OcflObject = require('../lib/ocflObject');
+const _ = require('lodash');
+
+const DIGEST_ALGORITHM = 'sha512';
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -204,6 +208,8 @@ describe('object with content imported from an existing directory', async functi
 describe('object with content added by a callback', async function () {
   const object = new OcflObject();
   const objectPath1 = path.join(process.cwd(), './test-data/ocfl-object1');
+  const inventoryPath1 = path.join(objectPath1, 'inventory.json');
+  const inventoryPath1_v1 = path.join(objectPath1, 'v1', 'inventory.json');
   const id = "some_id";
 
   const CONTENT = {
@@ -211,6 +217,8 @@ describe('object with content added by a callback', async function () {
     'dir/file2.txt': 'Contents of file2.txt',
     'file3.txt': 'Contents of file3.txt'
   };
+
+
 
 
   const makeContent = async (dir) => {
@@ -239,6 +247,19 @@ describe('object with content added by a callback', async function () {
     }
   })
   
+  it('should have a manifest entry for each file with the correct hash', async function () {
+    const files = Object.keys(CONTENT);
+    const inv = await fs.readJSON(inventoryPath1);
+    const manifest = inv.manifest;
+    for( const f of files ) {
+      const ocflf = path.join(objectPath1, 'v1/content', f);
+      expect(ocflf).to.be.a.file(`${ocflf} is a file`).with.content(CONTENT[f]);
+      const h = await hasha.fromFile(ocflf, { algorithm: DIGEST_ALGORITHM });
+      expect(manifest[h][0]).to.equal(path.join('v1/content', f));
+      delete manifest[h];
+    }
+    expect(manifest).to.be.empty;
+  })
 
 
   // it('should have file1.txt ', async function() {
@@ -254,23 +275,23 @@ describe('object with content added by a callback', async function () {
   // });
 
     
-  // it('should have an inventory digest file', function () {
-  //   assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
-  // });
+  it('should have an inventory digest file', function () {
+    assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
+  });
    
-  // it('should have a V1 inventory file', function () {
-  //   assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json')), true);
-  // });
+  it('should have a V1 inventory file', function () {
+    assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json')), true);
+  });
 
-  // it('should have a V1 inventory digest file', function () {
-  //   assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json.sha512')), true);
-  // }); 
+  it('should have a V1 inventory digest file', function () {
+    assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json.sha512')), true);
+  }); 
      
-  // after(async function () {
-  //   //TODO: destroy test objPath
-  //   //fs.removeSync(objectPath);
-  //   await fs.remove(objectPath1);
-  // });
+  after(async function () {
+    //TODO: destroy test objPath
+    //fs.removeSync(objectPath);
+    await fs.remove(objectPath1);
+  });
   
 
 });
