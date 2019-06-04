@@ -196,5 +196,5 @@ describe('object with content', async function () {
 after(function () {
   //TODO: destroy test objPath
   //fs.removeSync(objectPath);
-  //fs.removeSync(objectPath1);
+  fs.removeSync(objectPath1);
 });
