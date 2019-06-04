@@ -3,11 +3,17 @@ const path = require('path');
 const fs = require('fs-extra');
 const uuidv4 = require('uuidv4');
 const pairtree = require('pairtree');
+const hasha = require('hasha');
 const Repository = require('../lib/repository');
 const OcflObject = require('../lib/ocflObject');
+
 const chai = require('chai');
+
 const expect = chai.expect;
 chai.use(require('chai-fs'));
+
+const DIGEST_ALGORITHM = 'sha512';
+
 
 function createDirectory(aPath) {
   if (!fs.existsSync(aPath)) {
@@ -105,7 +111,7 @@ describe('Successful repository creation', function () {
 
 });
 
-describe('Adding objects', function () {
+describe('Adding objects from directories', function () {
  
 
   const repeatedFileHash = "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99";
@@ -117,7 +123,7 @@ describe('Adding objects', function () {
 
   it('should make up an ID if you add content', async function () {
     const repository = await createTestRepo();
-    const obj = await repository.importNewObject(null, sourcePath1);
+    const obj = await repository.importNewObjectDir(null, sourcePath1);
     const inv = await obj.getInventory();
     const new_id = inv.id;
     // We got a UUID as an an ID
@@ -129,7 +135,7 @@ describe('Adding objects', function () {
 
   it('should use your id for a new object if you give it one', async function () {
     const repository = await createTestRepo();
-    const obj = await repository.importNewObject("some_other_id", sourcePath1);
+    const obj = await repository.importNewObjectDir("some_other_id", sourcePath1);
     // We got a UUID as an an ID
     const inv = await (obj.getInventory());
     assert.strictEqual(inv.id, "some_other_id");
@@ -153,7 +159,7 @@ describe('Adding objects', function () {
     const repository = await createTestRepo();
     try {
       const depositDir = await fs.mkdirp(path.join(repositoryPath, "deposit", "some_id"));
-      const new_id = await repository.importNewObject("some_id", sourcePath1);
+      const new_id = await repository.importNewObjectDir("some_id", sourcePath1);
     }
     catch (e) {
       assert.strictEqual(e.message, 'There is already an object with this ID being deposited or left behind after a crash. Cannot proceed.');
@@ -163,9 +169,9 @@ describe('Adding objects', function () {
 
   it('Should now have three objects in it', async function () {
     const repository = await createTestRepo();
-    const obj1 = await repository.importNewObject("1", sourcePath1);
-    const obj2 = await repository.importNewObject("2", sourcePath1);
-    const obj3 = await repository.importNewObject("3", sourcePath1);
+    const obj1 = await repository.importNewObjectDir("1", sourcePath1);
+    const obj2 = await repository.importNewObjectDir("2", sourcePath1);
+    const obj3 = await repository.importNewObjectDir("3", sourcePath1);
 
     const objects = await repository.objects();
     assert.strictEqual(objects.length, 3)
@@ -190,8 +196,8 @@ describe('Adding objects', function () {
     fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file2.txt"), "$T)(*SKGJKdfsfVJS DFKJs");
 
     const test_id = "id";
-    const id = await repository.importNewObject(test_id, sourcePath1);
-    const obj = await repository.importNewObject(test_id, sourcePath1_additional_files);
+    const id = await repository.importNewObjectDir(test_id, sourcePath1);
+    const obj = await repository.importNewObjectDir(test_id, sourcePath1_additional_files);
 
 
 
@@ -211,7 +217,7 @@ describe('Adding objects', function () {
 
     // Now delete some stuff 
     const rm = await fs.remove(path.join(sourcePath1_additional_files, "sample", "pics"));
-    const new_id1 = await repository.importNewObject(test_id, sourcePath1_additional_files);
+    const new_id1 = await repository.importNewObjectDir(test_id, sourcePath1_additional_files);
 
     // Re-initialize exsiting object
     const inv1 = await object.getInventory();
@@ -225,7 +231,7 @@ describe('Adding objects', function () {
 
     // Now put some stuff back
     fs.copySync(path.join(sourcePath1, "sample", "pics"), path.join(sourcePath1_additional_files, "sample"));
-    const new_id2 = await repository.importNewObject(sourcePath1_additional_files, test_id);
+    const new_id2 = await repository.importNewObjectDir(sourcePath1_additional_files, test_id);
     const inv2 = await object.getInventory();
     assert.strictEqual(Object.keys(inv1.manifest).length, 211);
     assert.strictEqual(inv2.manifest[sepiaPicHash][0], sepiaPicPath);
@@ -288,6 +294,90 @@ describe('Adding objects', function () {
       assert.strictEqual(e.message, "Can't export a version that doesn't exist.", "Refuses to export non existent version");
     }
   });
+
+});
+
+
+// FIXME: a lot of this is duplicated from the directory import tests
+// and could be streamlined
+
+
+describe('Adding objects with callbacks', async function () {
+
+  const CONTENT = {
+    'dir/file1.txt': 'Contents of file1.txt',
+    'dir/file2.txt': 'Contents of file2.txt',
+    'file3.txt': 'Contents of file3.txt'
+  };
+
+  const makeContent = async (dir) => {
+    const files = Object.keys(CONTENT);
+    for( const f of files ) {
+      const d = path.join(dir, path.dirname(f));
+      await fs.ensureDir(d);
+      await fs.writeFile(path.join(dir, f), CONTENT[f]);
+    }
+  };
+
+  
+  it('can create an object with a callback', async function () {
+    const repository = await createTestRepo();
+    const object = await repository.createNewObjectContent("some_id", makeContent);
+    assert.strictEqual(object.ocflVersion, '1.0');
+  });
+
+
+  it('should make up an ID if you add content', async function () {
+    const repository = await createTestRepo();
+    const obj = await repository.createNewObjectContent(null, makeContent);
+    const inv = await obj.getInventory();
+    const new_id = inv.id;
+    // We got a UUID as an an ID
+    assert.strictEqual(new_id.length, 36);
+    // Check  that the object is there
+    const objectPath = path.join(repositoryPath, new_id.replace(/(..)/g, "$1/"));
+    assert.strictEqual(fs.existsSync(objectPath), true);
+  });
+
+  it('should use your id for a new object if you give it one', async function () {
+    const repository = await createTestRepo();
+    const obj = await repository.createNewObjectContent("some_other_id", makeContent);
+    // We got a UUID as an an ID
+    const inv = await (obj.getInventory());
+    assert.strictEqual(inv.id, "some_other_id");
+    // Check  that the object is there
+    const objectPath = path.join(repositoryPath, inv.id.replace(/(..)/g, "$1/"));
+    assert.strictEqual(fs.existsSync(objectPath), true);
+  });
+
+
+
+
+  it('should have the content generated by the callback', async function () {
+    const repository = await createTestRepo();
+    const obj = await repository.createNewObjectContent("some_other_id", makeContent);
+    const files = Object.keys(CONTENT);
+    for( const f of files ) {
+      const ocflf = path.join(obj.path, 'v1/content', f);
+      expect(ocflf).to.be.a.file(`${ocflf} is a file`).with.content(CONTENT[f]);
+    }
+  })
+  
+  it('should have a manifest entry for each file with the correct hash', async function () {
+    const repository = await createTestRepo();
+    const obj = await repository.createNewObjectContent("some_other_id", makeContent);
+    const files = Object.keys(CONTENT);
+    const inventory = await obj.getInventory();
+    const manifest = inventory.manifest;
+    for( const f of files ) {
+      const ocflf = path.join(obj.path, 'v1/content', f);
+      expect(ocflf).to.be.a.file(`${ocflf} is a file`).with.content(CONTENT[f]);
+      const h = await hasha.fromFile(ocflf, { algorithm: DIGEST_ALGORITHM });
+      expect(manifest[h][0]).to.equal(path.join('v1/content', f));
+      delete manifest[h];
+    }
+    expect(manifest).to.be.empty;
+  })
 
 });
 

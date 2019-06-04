@@ -234,7 +234,7 @@ describe('object with content added by a callback', async function () {
   it('can create an object with a callback that writes to the directory', async function () {
     createDirectory(objectPath1);
     await object.create(objectPath1);
-    await object.importContent("some_id", makeContent);
+    await object.addContent("some_id", makeContent);
     assert.strictEqual(object.ocflVersion, '1.0');
   });
 
