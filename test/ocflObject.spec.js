@@ -103,98 +103,98 @@ describe('object with content', async function () {
   const file1Hash = "4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8db9dfe84c58b2b37b89903a740e1ee172da793a6e79d560e5f7f9bd058a12a280433ed6fa46510a"
   const id = "some_id";
   createDirectory(objectPath1);
-    it('should test content root', async function () {
-      const create = await object.create(objectPath1);
-      const init = await object.importDir("some_id", sourcePath1);
-      assert.strictEqual(object.ocflVersion, '1.0');
-    });
-    it('should have a namaste', function () {
-      assert.strictEqual(object.path, objectPath1);
-    });
-    it('should have a namaste file', function () {
+  
+  it('should test content root', async function () {
+    const create = await object.create(objectPath1);
+    const init = await object.importDir("some_id", sourcePath1);
+    assert.strictEqual(object.ocflVersion, '1.0');
+  });
+  
+  it('should have a namaste', function () {
+    assert.strictEqual(object.path, objectPath1);
+  });
+  
+  it('should have a namaste file', function () {
       //create this test path
-      assert.strictEqual(fs.existsSync(path.join(objectPath1, '0=ocfl_object_1.0')), true);
-    });
+    assert.strictEqual(fs.existsSync(path.join(objectPath1, '0=ocfl_object_1.0')), true);
+  });
 
-    it('should have a v1 dir', function () {
-        //create this test path
-        expect(path.join(objectPath1, 'v1')).to.be.a.directory("v1 dir");
-    });
+  it('should have a v1 dir', function () {
+      //create this test path
+      expect(path.join(objectPath1, 'v1')).to.be.a.directory("v1 dir");
+  });
 
-    it('should be version 1', function () {
-       assert.strictEqual(object.contentVersion, "v1");
-    });
+  it('should be version 1', function () {
+    assert.strictEqual(object.contentVersion, "v1");
+  });
 
-    const contentPath = path.join(objectPath1, 'v1', 'content');
+  const contentPath = path.join(objectPath1, 'v1', 'content');
 
-    it('should have a v1/content dir', function () {
-    //create this test path
-      expect(contentPath).to.be.a.directory("v1/content dir");
-    });
+  it('should have a v1/content dir', function () {
+  //create this test path
+    expect(contentPath).to.be.a.directory("v1/content dir");
+  });
 
-    it('should have a manifest (inventory)', function () {
-    //create this test path
-      expect(inventoryPath1).to.be.a.file("inventory.json is a file");
-    });
+  it('should have a manifest (inventory)', function () {
+  //create this test path
+    expect(inventoryPath1).to.be.a.file("inventory.json is a file");
+  });
 
-    
+  it("object has same directory structure as source", function () {
+    expect(contentPath).to.to.be.a.directory().and.deep.equal(sourcePath1, "ocfl content has original directory structure");
+  });   
 
-    it("object has same directory structure as source", function () {
-      expect(contentPath).to.to.be.a.directory().and.deep.equal(sourcePath1, "ocfl content has original directory structure");
-    });   
-
-    it("has copied all the contents of the source to the object", function () {
-      expect(sourcePath1).to.be.a.directory("is a dir").with.deep.files.that.satisfy((files) => {
-        return files.every((file) => {
-          const fixture_file = path.join(sourcePath1, file);
-          const output_file = path.join(contentPath, file);
-          expect(output_file).to.be.a.file(`file ${output_file}`).and.equal(fixture_file, `${output_file} content matches`);
-          return true;
-        })
+  it("has copied all the contents of the source to the object", function () {
+    expect(sourcePath1).to.be.a.directory("is a dir").with.deep.files.that.satisfy((files) => {
+      return files.every((file) => {
+        const fixture_file = path.join(sourcePath1, file);
+        const output_file = path.join(contentPath, file);
+        expect(output_file).to.be.a.file(`file ${output_file}`).and.equal(fixture_file, `${output_file} content matches`);
+        return true;
       })
-    });
+    })
+  });
 
-    // either the magic number here is wrong or there are some missing files in the
-    // test fixture
+  // either the magic number here is wrong or there are some missing files in the
+  // test fixture
 
-    it.skip(`should have a manifest (inventory) with 209 items in it`, async function () {
-        const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
-        assert.strictEqual(Object.keys(inv.manifest).length, 209);
-    });
+  it.skip(`should have a manifest (inventory) with 209 items in it`, async function () {
+      const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+      assert.strictEqual(Object.keys(inv.manifest).length, 209);
+  });
 
 
-    it('should have file1.txt ', async function() {
-        const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
-        assert.strictEqual(inv.manifest[file1Hash][0],"v1/content/sample/lots_of_little_files/file_1.txt");
-        assert.strictEqual(inv.versions["v1"].state[file1Hash][0], "sample/lots_of_little_files/file_1.txt");
-    });
+  it('should have file1.txt ', async function() {
+    const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+    assert.strictEqual(inv.manifest[file1Hash][0],"v1/content/sample/lots_of_little_files/file_1.txt");
+    assert.strictEqual(inv.versions["v1"].state[file1Hash][0], "sample/lots_of_little_files/file_1.txt");
+  });
+  
+  it('should list 1 copies of file with same content in the manifest and 4 in v1', async function() {
+    const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+    assert.strictEqual(inv.manifest[repeatedFileHash].length, 1);
+    assert.strictEqual(inv.versions["v1"].state[repeatedFileHash].length,4);
+  });
+
     
-
-    it('should list 1 copies of file with same content in the manifest and 4 in v1', async function() {
-        const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
-        assert.strictEqual(inv.manifest[repeatedFileHash].length, 1);
-        assert.strictEqual(inv.versions["v1"].state[repeatedFileHash].length,4);
-    });
-
-    
-    it('should have an inventory digest file', function () {
-        assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
-    });
+  it('should have an inventory digest file', function () {
+    assert.strictEqual(fs.existsSync(inventoryPath1 + '.sha512'), true);
+  });
    
-    it('should have a V1 inventory file', function () {
+  it('should have a V1 inventory file', function () {
     assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json')), true);
-    });
+  });
 
-    it('should have a V1 inventory digest file', function () {
+  it('should have a V1 inventory digest file', function () {
     assert.strictEqual(fs.existsSync(path.join(objectPath1, "v1",  'inventory.json.sha512')), true);
-    }); 
-   
+  }); 
+     
   
 
 });
 
 after(function () {
   //TODO: destroy test objPath
-  fs.removeSync(objectPath);
+  //fs.removeSync(objectPath);
   //fs.removeSync(objectPath1);
 });
