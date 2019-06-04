@@ -118,7 +118,7 @@ describe('Adding objects', function () {
   it('should make up an ID if you add content', async function () {
     const repository = await createTestRepo();
     const obj = await repository.importNewObject(null, sourcePath1);
-    const inv = await (obj.getInventory());
+    const inv = await obj.getInventory();
     const new_id = inv.id;
     // We got a UUID as an an ID
     assert.strictEqual(new_id.length, 36);
