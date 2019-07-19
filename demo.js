@@ -35,12 +35,12 @@ async function demo() {
   const emp = await fs.mkdir(subDir);
 
   // Add demoContentPath to the repository 
-  const new_object1 = await repo.importNewObject(demoContentPath, demoObjectID1);
+  const new_object1 = await repo.importNewObjectDir(demoObjectID1, demoContentPath);
   var inv1 = await new_object1.getInventory();
   console.log("Head version of object 1", inv1.head);
   console.log("Object 1 has this many files", Object.keys(inv1.versions[inv1.head].state).length)
 
-  const new_object2 = await repo.importNewObject(demoContentPath, demoObjectID2);
+  const new_object2 = await repo.importNewObjectDir(demoObjectID2, demoContentPath);
 
   var inv1 = await new_object1.getInventory();
 
@@ -57,14 +57,14 @@ async function demo() {
 
 
   console.log("Re-add the demo directory to object1");
-  const new_object1v1 = await repo.importNewObject(demoContentPath, demoObjectID1);
+  const new_object1v1 = await repo.importNewObjectDir(demoObjectID1, demoContentPath);
   inv1 = await new_object1.getInventory();
 
   console.log("Head version of object 1:", inv1.head);
   console.log("Object 1 has this many files:", Object.keys(inv1.versions[inv1.head].state).length)
   console.log("Removing file3.txt from the content");
   const rmf3 = await fs.remove(path.join(demoContentPath, "file3.txt"));
-  const new_object1v3 = await repo.importNewObject(demoContentPath, demoObjectID1);
+  const new_object1v3 = await repo.importNewObjectDir(demoObjectID1, demoContentPath);
   inv1 = await new_object1.getInventory();
   console.log("Head version of object 1:", inv1.head);
   console.log("Object 1 has this many files:", Object.keys(inv1.versions[inv1.head].state).length)
