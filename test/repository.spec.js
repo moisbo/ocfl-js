@@ -327,6 +327,15 @@ describe('Adding objects with callbacks', async function () {
   });
 
 
+  it('Does not increment version number if you add the same thing twice', async function () {
+    const repository = await createTestRepo();
+    await repository.createNewObjectContent("some_id", makeContent);
+    const object = await repository.createNewObjectContent("some_id", makeContent);
+    const inventory = await object.getInventory();
+    assert.strictEqual(inventory.head, 'v1');
+  });
+
+
   it('should make up an ID if you add content', async function () {
     const repository = await createTestRepo();
     const obj = await repository.createNewObjectContent(null, makeContent);
