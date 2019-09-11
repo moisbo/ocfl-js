@@ -163,7 +163,7 @@ describe('object with content imported from an existing directory', async functi
   // test fixture
 
   it.skip(`should have a manifest (inventory) with 209 items in it`, async function () {
-      const inv = await JSON.parse(fs.readFileSync(inventoryPath1));
+      const inv = await JSON.parse(fs.readFile(inventoryPath1));
       assert.strictEqual(Object.keys(inv.manifest).length, 209);
   });
 

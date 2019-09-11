@@ -182,10 +182,10 @@ describe('Adding objects from directories', function () {
 
     // TODO: break this into smaller it()s and fix the 211 magic number bug
 
-  it.skip('should handle file additions and export', async function () {
+  it('should handle file additions and export', async function () {
     // TODO this depends on tests above running - fix that!
     const repository = new Repository();
-    const i = repository.load(repositoryPath);
+    await repository.load(repositoryPath);
 
     fs.removeSync(sourcePath1_additional_files);
     fs.copySync(sourcePath1, sourcePath1_additional_files);
@@ -196,9 +196,8 @@ describe('Adding objects from directories', function () {
     fs.writeFileSync(path.join(sourcePath1_additional_files, "sample", "file2.txt"), "$T)(*SKGJKdfsfVJS DFKJs");
 
     const test_id = "id";
-    const id = await repository.importNewObjectDir(test_id, sourcePath1);
+    await repository.importNewObjectDir(test_id, sourcePath1);
     const obj = await repository.importNewObjectDir(test_id, sourcePath1_additional_files);
-
 
 
     const inv3 = await obj.getInventory();
@@ -209,15 +208,16 @@ describe('Adding objects from directories', function () {
     assert.strictEqual(fs.existsSync(objectPath), true);
     // Check that it's v2
     const object = new OcflObject();
-    const o = await object.load(objectPath);
+    await object.load(objectPath);
     const inv = await object.getInventory();
 
     assert.strictEqual(inv.versions["v2"].state[repeatedFileHash].length, 4);
     assert.strictEqual(inv.versions["v2"].state[repeatedFileHash].indexOf("sample/lots_of_little_files/file_0-copy1.txt") > -1, true);
 
     // Now delete some stuff 
-    const rm = await fs.remove(path.join(sourcePath1_additional_files, "sample", "pics"));
-    const new_id1 = await repository.importNewObjectDir(test_id, sourcePath1_additional_files);
+    await fs.remove(path.join(sourcePath1_additional_files, "sample", "pics"));
+    // And re-import
+    await repository.importNewObjectDir(test_id, sourcePath1_additional_files);
 
     // Re-initialize exsiting object
     const inv1 = await object.getInventory();
@@ -230,8 +230,9 @@ describe('Adding objects from directories', function () {
     assert.strictEqual(inv1.versions["v3"].state[sepiaPicHash], undefined);
 
     // Now put some stuff back
-    fs.copySync(path.join(sourcePath1, "sample", "pics"), path.join(sourcePath1_additional_files, "sample"));
-    const new_id2 = await repository.importNewObjectDir(sourcePath1_additional_files, test_id);
+    fs.copySync(path.join(sourcePath1, "sample", "pics"), path.join(sourcePath1_additional_files, "sample", "pics"));
+    await repository.importNewObjectDir(test_id, sourcePath1_additional_files);
+
     const inv2 = await object.getInventory();
     assert.strictEqual(Object.keys(inv1.manifest).length, 211);
     assert.strictEqual(inv2.manifest[sepiaPicHash][0], sepiaPicPath);
@@ -249,9 +250,9 @@ describe('Adding objects from directories', function () {
     const exportDirV5 = path.join("test-data", "exportv5");
     const exportDirV1 = path.join("test-data", "exportv1");
 
-    const rmf1 = await fs.remove(exportDirV1);
-    const rmf4 = await fs.remove(exportDirV4);
-    const rmf5 = await fs.remove(exportDirV5);
+    await fs.remove(exportDirV1);
+    await fs.remove(exportDirV4);
+    await fs.remove(exportDirV5);
 
 
     const testId = "id";
@@ -268,10 +269,10 @@ describe('Adding objects from directories', function () {
     } catch (e) {
       assert.strictEqual(e.message, "Can't export to an existing file.", "Cannot export over the top of a file");
     }
-    const rmf4a = await fs.remove(exportDirV4);
+    await fs.remove(exportDirV4);
 
-    const new41 = await fs.mkdir(exportDirV4);
-    const xp4 = await repository.export(testId, exportDirV4);
+    await fs.mkdir(exportDirV4);
+    await repository.export(testId, exportDirV4);
 
     expect(exportDirV4).to.be.a.directory().and.deep.equal(sourcePath1_additional_files, "Matches the stuff that was imported", "Exported v4 is the same as the thing we imported.");
 
@@ -282,17 +283,18 @@ describe('Adding objects from directories', function () {
       assert.strictEqual(e.message, "Can't export as the directory has stuff in it.", "Will not export to a directory that has existing content.");
     }
 
-    const new1 = await fs.mkdir(exportDirV1);
-    const xp1 = await repository.export(testId, exportDirV1, { version: "v1" });
+    await fs.mkdir(exportDirV1);
+    await repository.export(testId, exportDirV1, { version: "v1" });
     expect(exportDirV1).to.be.a.directory().and.deep.equal(sourcePath1, "Matches the stuff that was imported");
 
-    const new5 = await fs.mkdir(exportDirV5);
+    await fs.mkdir(exportDirV5);
 
     try {
-      const init = await repository.export(testId, exportDirV5, { version: "v5" });
+      await repository.export(testId, exportDirV5, { version: "v5" });
     } catch (e) {
       assert.strictEqual(e.message, "Can't export a version that doesn't exist.", "Refuses to export non existent version");
     }
+    
   });
 
 });
@@ -329,10 +331,30 @@ describe('Adding objects with callbacks', async function () {
 
   it('Does not increment version number if you add the same thing twice', async function () {
     const repository = await createTestRepo();
-    await repository.createNewObjectContent("some_id", makeContent);
-    const object = await repository.createNewObjectContent("some_id", makeContent);
+    await repository.createNewObjectContent("xx", makeContent);
+    const object = await repository.createNewObjectContent("xx", makeContent);
     const inventory = await object.getInventory();
     assert.strictEqual(inventory.head, 'v1');
+  });
+
+  it('Does not let you use a subset of an existing id', async function () {
+    const repository = await createTestRepo();
+    await repository.createNewObjectContent("aaaa", makeContent);
+    try {
+      const object = await repository.createNewObjectContent("aa", makeContent);
+    } catch (e) {
+      assert.strictEqual(e.message, 'There is no object here but the path already exists is this ID a subset of a longer one?');
+    } 
+  });
+
+  it('Does not let you use a superset of an existing id', async function () {
+    const repository = await createTestRepo();
+    await repository.createNewObjectContent("cc", makeContent);
+    try {
+       await repository.createNewObjectContent("ccdd", makeContent);
+    } catch (e) {
+      assert.strictEqual(e.message, 'Cannot make an object. There is already an object in a higher level directory.');
+    } 
   });
 
 
