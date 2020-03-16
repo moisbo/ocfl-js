@@ -1,6 +1,6 @@
 {
   "name": "ocfl",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Oxford Common File Layout",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,8 @@
     "storage"
   ],
   "author": "Mike Lynch",
-  "repository": "https://github.com/UTS-eResearch/ocfl-js",
+  "contributors": "Marco La Rosa",
+  "repository": "https://github.com/CoEDL/ocfl-js",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "chai": "^4.2.0",
