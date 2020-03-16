@@ -1,10 +1,10 @@
 {
   "name": "ocfl",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Oxford Common File Layout",
   "main": "index.js",
   "scripts": {
-    "tests": "./node_modules/.bin/mocha --require esm"
+    "test": "./node_modules/.bin/mocha --require esm"
   },
   "keywords": [
     "ocfl",
@@ -17,18 +17,16 @@
   "repository": "https://github.com/CoEDL/ocfl-js",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "chai": "^4.2.0",
-    "chai-fs": "^2.0.0",
-    "fs-extra": "^7.0.1",
-    "hasha": "^3.0.0",
-    "lodash": "^4.17.11",
+    "fs-extra": "^8.1.0",
+    "hasha": "^5.2.0",
+    "lodash": "^4.17.15",
     "pairtree": "0.0.1",
-    "through2": "^3.0.0",
-    "uuid": "^3.3.2",
-    "uuidv4": "^4.0.0"
+    "uuidv4": "^6.0.6"
   },
   "devDependencies": {
-    "esm": "^3.2.22",
-    "mocha": "^6.1.4"
+    "chai": "^4.2.0",
+    "chai-fs": "^2.0.0",
+    "esm": "^3.2.25",
+    "mocha": "^7.1.0"
   }
 }
