@@ -10,7 +10,6 @@ const DIGEST_ALGORITHM = "sha512";
 
 const chai = require("chai");
 const expect = chai.expect;
-chai.use(require("chai-fs"));
 
 describe("Testing object creation functionality", async () => {
   let object;
@@ -36,8 +35,8 @@ describe("Testing object creation functionality", async () => {
     expect(Object.keys(inventory.versions).length).to.equal(1);
     expect(inventory.manifest).to.deep.equal({
       "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-        "v1/content/sample/file_0.txt"
-      ]
+        "v1/content/sample/file_0.txt",
+      ],
     });
   });
   it(`should fail to create an object because there's already one in deposit`, async () => {
@@ -81,8 +80,8 @@ describe("Testing object creation functionality", async () => {
     const inventory = await object.getLatestInventory();
     expect(inventory.manifest).to.deep.equal({
       "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-        "v1/content/sample/file_0.txt"
-      ]
+        "v1/content/sample/file_0.txt",
+      ],
     });
   });
   it("should be able to create an object with two versions by adding a file", async () => {
@@ -98,11 +97,11 @@ describe("Testing object creation functionality", async () => {
     expect(Object.keys(inventory.versions).length).to.equal(2);
     expect(inventory.manifest).to.deep.equal({
       de01d675497715d6e139c1182eeb4e9c73cfe25df4f1006a8e75679910c7b897707591bd574f27f21c50a6f624e737284c5271431302afa0bac8b66a342e3617: [
-        "v2/content/file1.txt"
+        "v2/content/file1.txt",
       ],
       "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-        "v1/content/sample/file_0.txt"
-      ]
+        "v1/content/sample/file_0.txt",
+      ],
     });
   });
   it("should be able to create an object with three versions by adding another file", async () => {
@@ -154,11 +153,11 @@ describe("Testing object creation functionality", async () => {
     expect(inventory.manifest).to.deep.equal({
       ea832e64995b2a7d64358abe682e9c0abfb015d22278a78ac17cb2d0a0ac2f9dfc02f5fb2e6baf37a77480a5be0b32957d0e9f979a77403ffb70a8dae1e319d8: [
         "v4/content/file1.txt",
-        "v3/content/file2.txt"
+        "v3/content/file2.txt",
       ],
       "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-        "v1/content/sample/file_0.txt"
-      ]
+        "v1/content/sample/file_0.txt",
+      ],
     });
   });
   it("should be able to create an object with five versions by removing an existing file", async () => {
@@ -193,11 +192,11 @@ describe("Testing object creation functionality", async () => {
     expect(Object.keys(inventory.versions).length).to.equal(5);
     expect(inventory.manifest).to.deep.equal({
       ea832e64995b2a7d64358abe682e9c0abfb015d22278a78ac17cb2d0a0ac2f9dfc02f5fb2e6baf37a77480a5be0b32957d0e9f979a77403ffb70a8dae1e319d8: [
-        "v4/content/file1.txt"
+        "v4/content/file1.txt",
       ],
       "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-        "v1/content/sample/file_0.txt"
-      ]
+        "v1/content/sample/file_0.txt",
+      ],
     });
   });
   it("should remain at one version when there is no change to the source", async () => {
@@ -211,8 +210,8 @@ describe("Testing object creation functionality", async () => {
     expect(Object.keys(inventory.versions).length).to.equal(1);
     expect(inventory.manifest).to.deep.equal({
       "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99": [
-        "v1/content/sample/file_0.txt"
-      ]
+        "v1/content/sample/file_0.txt",
+      ],
     });
   });
   it("should be able to create an object with a callback to write the content", async () => {
@@ -224,11 +223,11 @@ describe("Testing object creation functionality", async () => {
     expect(Object.keys(inventory.versions).length).to.equal(1);
     expect(inventory.manifest).to.deep.equal({
       "3abea15c00b706b25bd01ef29bfbe4fc117bb3464d0ba178bb2d924d71b758dd660dbef464e896ad4ec86e4bb498a7b58abb11b958875c468193cc42995b249e": [
-        "v1/content/dir/fileX.txt"
+        "v1/content/dir/fileX.txt",
       ],
       "9fb7cdf68ceaa2425e9e8f761e6b89c95250f63ae014c757436760caf9c28b2b368a173b340616ccbba0377c0c724a2d67a6c968a3b91968f72a8ed0da95e6cf": [
-        "v1/content/fileY.txt"
-      ]
+        "v1/content/fileY.txt",
+      ],
     });
   });
   it("should handle an object being written with a source folder and a callback", async () => {
@@ -244,11 +243,11 @@ describe("Testing object creation functionality", async () => {
     expect(Object.keys(inventory.versions).length).to.equal(2);
     expect(inventory.manifest).to.deep.equal({
       "3abea15c00b706b25bd01ef29bfbe4fc117bb3464d0ba178bb2d924d71b758dd660dbef464e896ad4ec86e4bb498a7b58abb11b958875c468193cc42995b249e": [
-        "v2/content/dir/fileX.txt"
+        "v2/content/dir/fileX.txt",
       ],
       "9fb7cdf68ceaa2425e9e8f761e6b89c95250f63ae014c757436760caf9c28b2b368a173b340616ccbba0377c0c724a2d67a6c968a3b91968f72a8ed0da95e6cf": [
-        "v2/content/fileY.txt"
-      ]
+        "v2/content/fileY.txt",
+      ],
     });
   });
   it("should object to both source and writer being defined", async () => {
@@ -354,7 +353,7 @@ describe("Testing object creation functionality", async () => {
   async function writeContent({ target }) {
     const CONTENT = {
       "dir/fileX.txt": "Contents of fileX.txt",
-      "fileY.txt": "Contents of fileY.txt"
+      "fileY.txt": "Contents of fileY.txt",
     };
     const files = Object.keys(CONTENT);
     for (const f of files) {
@@ -437,9 +436,9 @@ describe("Testing object manipulation functionality - object with one version", 
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
   });
   it("should be able to get the latest state from an object with one version", async () => {
@@ -460,9 +459,9 @@ describe("Testing object manipulation functionality - object with one version", 
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
   });
   it("should be able to get all states from an object with one version", async () => {
@@ -485,9 +484,9 @@ describe("Testing object manipulation functionality - object with one version", 
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
   });
   it("should be able to remove an object from the repository", async () => {
@@ -571,9 +570,9 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
   });
   it("should be able to get the latest state from an object with one version", async () => {
@@ -586,8 +585,8 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v2/content/file1.txt",
           hash:
             "de01d675497715d6e139c1182eeb4e9c73cfe25df4f1006a8e75679910c7b897707591bd574f27f21c50a6f624e737284c5271431302afa0bac8b66a342e3617",
-          version: 2
-        }
+          version: 2,
+        },
       ],
       "file2.txt": [
         {
@@ -595,8 +594,8 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v3/content/file2.txt",
           hash:
             "ea832e64995b2a7d64358abe682e9c0abfb015d22278a78ac17cb2d0a0ac2f9dfc02f5fb2e6baf37a77480a5be0b32957d0e9f979a77403ffb70a8dae1e319d8",
-          version: 3
-        }
+          version: 3,
+        },
       ],
       "file_0.txt": [
         {
@@ -604,9 +603,9 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
   });
   it("should be able to get all states from an object with one version", async () => {
@@ -623,9 +622,9 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
 
     const state2 = content.shift();
@@ -637,8 +636,8 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v2/content/file1.txt",
           hash:
             "de01d675497715d6e139c1182eeb4e9c73cfe25df4f1006a8e75679910c7b897707591bd574f27f21c50a6f624e737284c5271431302afa0bac8b66a342e3617",
-          version: 2
-        }
+          version: 2,
+        },
       ],
       "file_0.txt": [
         {
@@ -646,9 +645,9 @@ describe("Testing object manipulation functionality - object with three versions
           path: "v1/content/sample/file_0.txt",
           hash:
             "31bca02094eb78126a517b206a88c73cfa9ec6f704c7030d18212cace820f025f00bf0ea68dbf3f3a5436ca63b53bf7bf80ad8d5de7d8359d0b7fed9dbc3ab99",
-          version: 1
-        }
-      ]
+          version: 1,
+        },
+      ],
     });
   });
 });

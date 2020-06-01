@@ -1,16 +1,10 @@
-const assert = require("assert");
-const path = require("path");
 const fs = require("fs-extra");
-const uuidv4 = require("uuidv4");
-const pairtree = require("pairtree");
-const hasha = require("hasha");
 const Repository = require("../lib/repository");
 const OcflObject = require("../lib/ocflObject");
 
 const chai = require("chai");
 
 const expect = chai.expect;
-chai.use(require("chai-fs"));
 
 const DIGEST_ALGORITHM = "sha512";
 
@@ -80,7 +74,7 @@ describe("Repository initialisation", () => {
     await object.update({ source: "./test-data/simple-ocfl-object" });
 
     repository.findObjects({});
-    repository.on("object", object => {
+    repository.on("object", (object) => {
       expect(object.objectPath).to.equal("/xx/1");
       object = new OcflObject(object);
       expect(object.id).to.equal("/xx/1");
@@ -102,7 +96,7 @@ describe("Repository initialisation", () => {
 
     repository.findObjects({});
     let objects = [];
-    repository.on("object", object => objects.push(object));
+    repository.on("object", (object) => objects.push(object));
     setTimeout(() => {
       expect(objects.length).to.equal(3);
     }, 200);
