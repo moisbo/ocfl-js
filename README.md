@@ -11,11 +11,13 @@
 		- [Create an object with an ID - ingest a folder](#create-an-object-with-an-id---ingest-a-folder)
 		- [Create an object with a path](#create-an-object-with-a-path)
 		- [Create an object with an ID - pass in a callback that will write to deposit path](#create-an-object-with-an-id---pass-in-a-callback-that-will-write-to-deposit-path)
+		- [Break out of an update before committing to the repository](#break-out-of-an-update-before-committing-to-the-repository)
 		- [Check if object exists at path](#check-if-object-exists-at-path)
 		- [Check if object can be created in the repo at path](#check-if-object-can-be-created-in-the-repo-at-path)
 		- [Load an object and getLatestInventory](#load-an-object-and-getlatestinventory)
 		- [Get object versions](#get-object-versions)
 		- [Load object and get information from it](#load-object-and-get-information-from-it)
+		- [Get the diff between two versions](#get-the-diff-between-two-versions)
 		- [Resolve file path relative to object root](#resolve-file-path-relative-to-object-root)
 		- [Export an object](#export-an-object)
 		- [Remove an object](#remove-an-object)
@@ -138,6 +140,62 @@ async function writeContent({ target }) {
 
 ```
 
+### Break out of an update before committing to the repository
+
+There might be occassions where you wish to break out of an update before the object is commit to the repo. Perhaps you want to check the changes and decide to abort. This is possible as follows:
+
+1. set `commit: false` on the update method
+
+```
+({ inventory } = await object.update({
+      writer: writeContent,
+      commit: false,
+}));
+```
+
+2. load the object
+
+```
+await object.load();
+```
+
+3. Do what you need with the object At this point the internal state is set to the object in the deposit path so after loading you can get versions and perform a diff on versions. This is the object just before it would be commit back to the repo.
+
+```
+versions = await object.getVersions();
+versions = {
+  next: versions.pop().version,
+  previous: versions.pop().version,
+};
+diff = await object.diffVersions(versions);
+
+// diff looks like
+//
+//    {
+//      same: [ 'v1/content/dir/fileX.txt', 'v1/content/fileY.txt' ],
+//      previous: [],
+//      next: [
+//        'v2/content/repo-metadata/metadata.json',
+//        'v2/content/something-new.txt'
+//      ]
+//    }
+decide = diff.next.filter((filename) => !filename.match(/repo-metadata/));
+```
+
+4.  Decide what to do based on the diff - continue with the commit
+
+```
+await object.commit({ inventory });
+```
+
+5. Decide what to do based on the diff - abort the commit
+
+```
+await object.cleanup();
+```
+
+See the test `'it should be able to break out of an update and diff two versions'` in ocflObject.spec.js for a working example.
+
 ### Check if object exists at path
 
 ```
@@ -205,6 +263,24 @@ let r = await object.getVersion({version: 'v2'})
 
 // load all version states in one hit - COULD BE VERY EXPENSIVE
 await object.getAllVersions()
+```
+
+### Get the diff between two versions
+
+Two get a diff between two object versions:
+
+```
+let diff = await object.diffVersions({previous: 'v1', next: 'v2' })
+
+// And get a result like:
+//    {
+//      same: [ 'v1/content/dir/fileX.txt', 'v1/content/fileY.txt' ],
+//      previous: [],
+//      next: [
+//        'v2/content/repo-metadata/metadata.json',
+//        'v2/content/something-new.txt'
+//      ]
+//    }
 ```
 
 ### Resolve file path relative to object root
