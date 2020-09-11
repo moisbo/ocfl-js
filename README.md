@@ -159,7 +159,7 @@ There might be occassions where you wish to break out of an update before the ob
 await object.load();
 ```
 
-3. Do what you need with the object At this point the internal state is set to the object in the deposit path so after loading you can get versions and perform a diff on versions. This is the object just before it would be commit back to the repo.
+3. Do what you need with the object. At this point the internal state is set to the object in the deposit path so after loading you can get versions and perform a diff on versions. This is the object just before it would be commit back to the repo.
 
 ```
 versions = await object.getVersions();
