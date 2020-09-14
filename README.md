@@ -18,6 +18,7 @@
 		- [Get object versions](#get-object-versions)
 		- [Load object and get information from it](#load-object-and-get-information-from-it)
 		- [Get the diff between two versions](#get-the-diff-between-two-versions)
+		- [Verify the internal state of an object](#verify-the-internal-state-of-an-object)
 		- [Resolve file path relative to object root](#resolve-file-path-relative-to-object-root)
 		- [Export an object](#export-an-object)
 		- [Remove an object](#remove-an-object)
@@ -142,7 +143,8 @@ async function writeContent({ target }) {
 
 ### Break out of an update before committing to the repository
 
-There might be occassions where you wish to break out of an update before the object is commit to the repo. Perhaps you want to check the changes and decide to abort. This is possible as follows:
+There maybe occasions where you wish to break out of an update before the object is commit back in to
+the repo. Perhaps you want to check the changes and decide to abort. This is possible as follows:
 
 1. set `commit: false` on the update method
 
@@ -195,6 +197,9 @@ await object.cleanup();
 ```
 
 See the test `'it should be able to break out of an update and diff two versions'` in ocflObject.spec.js for a working example.
+
+**This method will verify the object before applying the commit and throw an error if the verfication
+fails**
 
 ### Check if object exists at path
 
@@ -282,6 +287,19 @@ let diff = await object.diffVersions({previous: 'v1', next: 'v2' })
 //      ]
 //    }
 ```
+
+### Verify the internal state of an object
+
+This method will check that all inventoried files exist within the object and have the correct hash as
+well as checking that all real files are found in the inventory files.
+
+```
+await object.update({ writer: writeContent });
+let { isValid, errors } = await object.verify();
+```
+
+- isValid: Boolean
+- errors: Array of errors discovered
 
 ### Resolve file path relative to object root
 
