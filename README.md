@@ -22,6 +22,7 @@
 		- [Resolve file path relative to object root](#resolve-file-path-relative-to-object-root)
 		- [Export an object](#export-an-object)
 		- [Remove an object](#remove-an-object)
+- [Tests](#tests)
 
 # About
 
@@ -336,3 +337,10 @@ let object = new OcflObject({ ocflRoot: 'some-path', id: 'some-id });
 // remove it
 await object.remove()
 ```
+
+# Tests
+
+Tests are in files alongside the code and they can be run once off or in watch mode:
+
+- Run once: `npm run test`
+- Watch mode: `npm run test:watch`
