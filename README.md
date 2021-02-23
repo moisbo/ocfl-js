@@ -53,7 +53,7 @@ Or in watch mode
 In both cases a minio docker container (s3 compatible object storage) will first be started as this is required for the s3 tests. The container will be setup with a bucket and credentials as follows:
 
 ```
-> BUCKET_NAME: test-bucket
+> BUCKET_NAME: test-bucket{1..3}
 > ACCESS_KEY_ID: minio
 > SECRET_KEY: minio_pass
 > ENDPOINT: http://localhost:9000
