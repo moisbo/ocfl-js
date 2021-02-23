@@ -14,6 +14,7 @@
 	- [Pass in a callback that will write to deposit path](#pass-in-a-callback-that-will-write-to-deposit-path)
 	- [Merge new content into an object](#merge-new-content-into-an-object)
 	- [Break out of an update before committing to the repository](#break-out-of-an-update-before-committing-to-the-repository)
+	- [Remove files and update version](#remove-files-and-update-version)
 	- [Check if object exists at path](#check-if-object-exists-at-path)
 	- [Check if object can be created in the repo at path](#check-if-object-can-be-created-in-the-repo-at-path)
 	- [Load an object and getLatestInventory](#load-an-object-and-getlatestinventory)
@@ -244,6 +245,21 @@ See the test `'it should be able to break out of an update and diff two versions
 
 **This method will verify the object before applying the commit and throw an error if the verfication
 fails**
+
+## Remove files and update version
+
+To create a new version with a file removed from the previous version you can either create
+a whole new version in the state you want via `update` or you can just ask for a new version
+to be created without the file.
+
+```
+await object.update({ removeFiles: ["file1.txt"] });
+```
+
+> Note: This does not delete the actual file from previous versions or rewrite the inventories in any
+> way. It just stamps a new version without a ref to the file or files. If you actually need to remove
+> something from an OCFL then you need to remove the whole object from the repo and reingest it
+> as new with the content removed from it. See: [Remove an object](#remove-an-object)
 
 ## Check if object exists at path
 
