@@ -8,9 +8,11 @@
 	- [Check if path is a repository](#check-if-path-is-a-repository)
 	- [Find objects in a repository - THIS IS AN EVENT EMITTER](#find-objects-in-a-repository---this-is-an-event-emitter)
 - [API - OCFL Object](#api---ocfl-object)
-	- [Create an object with an ID - ingest a folder](#create-an-object-with-an-id---ingest-a-folder)
+	- [Create an object with an ID](#create-an-object-with-an-id)
 	- [Create an object with a path](#create-an-object-with-a-path)
-	- [Create an object with an ID - pass in a callback that will write to deposit path](#create-an-object-with-an-id---pass-in-a-callback-that-will-write-to-deposit-path)
+	- [Ingest a folder of content into the object](#ingest-a-folder-of-content-into-the-object)
+	- [Pass in a callback that will write to deposit path](#pass-in-a-callback-that-will-write-to-deposit-path)
+	- [Merge new content into an object](#merge-new-content-into-an-object)
 	- [Break out of an update before committing to the repository](#break-out-of-an-update-before-committing-to-the-repository)
 	- [Check if object exists at path](#check-if-object-exists-at-path)
 	- [Check if object can be created in the repo at path](#check-if-object-can-be-created-in-the-repo-at-path)
@@ -128,19 +130,11 @@ const repository = new Repository({ ocflRoot, ocflScratch})
 let object = repository.ocflObject.init({ id: 'some-id });
 ```
 
-## Create an object with an ID - ingest a folder
+## Create an object with an ID
 
 ```
 // define the object
 let object = repository.ocflObject.init({ id: 'some-id });
-
-// create (v1) or update object with content at `source`
-await object.update({ source: '/path/to/some/content' });
-
-// add some data to content at `source`
-
-// update object with content at `source` - v2
-await object.update({ source: '/path/to/some/content' });
 ```
 
 ## Create an object with a path
@@ -150,7 +144,22 @@ await object.update({ source: '/path/to/some/content' });
 let object = repository.ocflObject.init({ objectPath: '/path/to/object' });
 ```
 
-## Create an object with an ID - pass in a callback that will write to deposit path
+## Ingest a folder of content into the object
+
+```
+// create (v1) or update object with content at `source`
+await object.update({ source: '/path/to/some/content' });
+
+// add some data to content at `source`
+
+// update object with content at `source` - v2
+await object.update({ source: '/path/to/some/content' });
+```
+
+## Pass in a callback that will write to deposit path
+
+You callback will be called with an object containing one param `target` which will be the
+path to write your content to.
 
 ```
 await object.update({ writer: writeContent  });
@@ -160,6 +169,20 @@ async function writeContent({ target }) {
 		await // write file to target (DEPOSIT PATH)
 	}
 }
+```
+
+## Merge new content into an object
+
+By default, calling `update` on an object will create a new version from the content you pull in
+during update. However, if you just want to add some content to an existing object without needing
+all of the current data you can perform an update in `merge` mode.
+
+```
+await object.update({ source: '/path/to/some/content', updateMode: 'merge' })
+
+or
+
+await object.update({ writer: writeContent, updateMode: 'merge' })
 ```
 
 ## Break out of an update before committing to the repository
