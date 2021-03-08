@@ -4,12 +4,13 @@
 - [Overview](#overview)
 - [API - Repository](#api---repository)
 	- [Initialisation](#initialisation)
+		- [Filesystem backend](#filesystem-backend)
+		- [S3 Backend](#s3-backend)
 	- [Creating a repository](#creating-a-repository)
 	- [Check if path is a repository](#check-if-path-is-a-repository)
 	- [Find objects in a repository - THIS IS AN EVENT EMITTER](#find-objects-in-a-repository---this-is-an-event-emitter)
 - [API - OCFL Object](#api---ocfl-object)
 	- [Create an object with an ID](#create-an-object-with-an-id)
-	- [Create an object with a path](#create-an-object-with-a-path)
 	- [Ingest a folder of content into the object](#ingest-a-folder-of-content-into-the-object)
 	- [Pass in a callback that will write to deposit path](#pass-in-a-callback-that-will-write-to-deposit-path)
 	- [Merge new content into an object](#merge-new-content-into-an-object)
@@ -25,10 +26,13 @@
 	- [Resolve file path relative to object root](#resolve-file-path-relative-to-object-root)
 	- [Export an object](#export-an-object)
 	- [Remove an object](#remove-an-object)
+	- [Get a presigned URL to a file](#get-a-presigned-url-to-a-file)
 
 # About
 
 This is a library to create and interact with Oxford Common File Layout (OCFL) filesystems and objects within them. This implementation is a fork of the version written by Mike Lynch at [UTS-eResearch](https://github.com/UTS-eResearch/ocfl-js).
+
+This library can work with OCFL repositories on disk (filesystem backend) or in an S3 bucket (S3 or S3 like system).
 
 # Installation
 
@@ -69,7 +73,11 @@ There is one entry point - Repository. Repository is used to create a repository
 
 ## Initialisation
 
-In all cases you must first get a handle to the repository:
+A repository can live on a filesystem or in S3 object storage. In all cases you must first get a handle to the repository before you can do anything else. The API for both backends is exactly the same. Just the initialisation varies.
+
+### Filesystem backend
+
+To get a handle to a repository on a filesystem:
 
 ```
 const repository = new Repository({
@@ -80,16 +88,36 @@ const repository = new Repository({
 
 > `ocflScratch` is optional but if not provided you will not be able to operate on any objects. You can just retrieve files from them.
 
+### S3 Backend
+
+To get a handle to a repository in an S3 bucket:
+
+```
+const configuration = {
+    type: "S3",
+    ocflScratch: '/path/to/scratch/space',
+    s3: {
+      bucket: "test-bucket3",
+      accessKeyId: "minio",
+      secretAccessKey: "minio_pass",
+      endpoint: "http://localhost:9000",
+    },
+};
+
+const repository = new Repository(configuration);
+```
+
+> The example shows hard coded values for the S3 options though you'd probably get them
+> from the environment in normal usage.
+
+> `ocflScratch` is optional but if not provided you will not be able to operate on any objects. You can just retrieve files from them.
+
 ## Creating a repository
 
 ```
 // ensure the target folder for the repo exists
 if (!await fs.exists(ocflRoot)) await fs.mkdirp(ocflRoot);
 if (!await fs.exists(ocflScratch)) await fs.mkdirp(ocflScratch);
-
-
-// define the repo
-repository = new Repository({ ocflRoot: {/path/to/repo}, ocflScratch: {/path/to/scratch/space} });
 
 // create it
 await repository.create()
@@ -108,7 +136,7 @@ await repository.isRepository()
 
 ```
 // find objects
-repository.findObjects({});
+repository.findObjects();
 
 // register with the 'object' event
 repository.on("object", object=> {
@@ -119,30 +147,21 @@ repository.on("object", object=> {
 
 # API - OCFL Object
 
-General note: `update` will load the object and latest version state and return that
-on successful update so you will automatically have the current internal file state
-available.
+> The API for working with an object is exactly the same regardless of whether the backend is a filesystem or an S3 bucket.
 
-In all cases you must first have a handle to the repo (see [Initialisation](#initialisation)) before
-you then create a handle to an object via an id or path, e.g.:
+> In all cases you must first have a handle to the repo (see [Initialisation](#initialisation)) before
+> you then create a handle to an object via an id, e.g.:
 
 ```
 const repository = new Repository({ ocflRoot, ocflScratch})
-let object = repository.ocflObject.init({ id: 'some-id });
+let object = repository.object({ id: 'some-id });
 ```
 
 ## Create an object with an ID
 
 ```
 // define the object
-let object = repository.ocflObject.init({ id: 'some-id });
-```
-
-## Create an object with a path
-
-```
-// define the object
-let object = repository.ocflObject.init({ objectPath: '/path/to/object' });
+let object = repository.object({ id: 'some-id });
 ```
 
 ## Ingest a folder of content into the object
@@ -370,4 +389,20 @@ await object.export({target: '/path/to/export/folder', version: 'v2'  })
 ```
 // remove it
 await object.remove()
+```
+
+## Get a presigned URL to a file
+
+> Only available when the backend is S3
+
+When using and S3 backend for the repository you can get a presigned url to a file so that
+your service can load the file from AWS directly. Just provide the `name (target)` of the file and the `version`
+that you want.
+
+```
+// get presigned url
+let url = await object.getPresignedUrl({
+    version: "v1",
+    target: "sample/file_0.txt",
+});
 ```

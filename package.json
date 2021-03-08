@@ -1,11 +1,11 @@
 {
   "name": "@coedl/ocfl",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Oxford Common File Layout JS library",
   "main": "index.js",
   "scripts": {
-    "test": "npm run minio && sleep 5 && ./node_modules/.bin/jest --runInBand & npm run cleanup",
-    "test:watch": "npm run minio && sleep 5 && ./node_modules/.bin/jest --watch && npm run cleanup",
+    "test": "npm run minio && sleep 5 && ./node_modules/.bin/jest --runInBand && npm run cleanup",
+    "test:watch": "npm run minio && sleep 5 && ./node_modules/.bin/jest --watch --runInBand && npm run cleanup",
     "minio": "docker-compose up -d",
     "cleanup": "docker-compose stop && docker-compose rm -f"
   },
@@ -21,6 +21,7 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.3.0",
+    "@aws-sdk/s3-request-presigner": "^3.7.0",
     "fs-extra": "^9.0.1",
     "hasha": "^5.2.2",
     "lodash": "^4.17.20",

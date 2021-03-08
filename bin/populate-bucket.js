@@ -3,7 +3,7 @@ const chance = require("chance").Chance();
 const { range } = require("lodash");
 
 (async () => {
-  const N_OBJECTS = 50;
+  const N_OBJECTS = 1;
   const configuration = {
     type: "S3",
     s3: {
