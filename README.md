@@ -14,7 +14,7 @@
 	- [Ingest a folder of content into the object](#ingest-a-folder-of-content-into-the-object)
 	- [Pass in a callback that will write to deposit path](#pass-in-a-callback-that-will-write-to-deposit-path)
 	- [Merge new content into an object](#merge-new-content-into-an-object)
-	- [Break out of an update before committing to the repository](#break-out-of-an-update-before-committing-to-the-repository)
+	- [Two stage update / commit - break out of an update before committing to the repository](#two-stage-update--commit---break-out-of-an-update-before-committing-to-the-repository)
 	- [Remove files and update version](#remove-files-and-update-version)
 	- [Check if object exists at path](#check-if-object-exists-at-path)
 	- [Check if object can be created in the repo at path](#check-if-object-can-be-created-in-the-repo-at-path)
@@ -205,7 +205,7 @@ or
 await object.update({ writer: writeContent, updateMode: 'merge' })
 ```
 
-## Break out of an update before committing to the repository
+## Two stage update / commit - break out of an update before committing to the repository
 
 There maybe occasions where you wish to break out of an update before the object is commit back in to
 the repo. Perhaps you want to check the changes and decide to abort. This is possible as follows:
@@ -219,13 +219,7 @@ the repo. Perhaps you want to check the changes and decide to abort. This is pos
 }));
 ```
 
-2. load the object
-
-```
-await object.load();
-```
-
-3. Do what you need with the object. At this point the internal state is set to the object in the deposit path so after loading you can get versions and perform a diff on versions. This is the object just before it would be commit back to the repo.
+2. Do what you need with the object. At this point the internal state is set to the object in the deposit path so after loading you can get versions and perform a diff on versions. This is the object just before it would be commit back to the repo.
 
 ```
 versions = await object.getVersions();
@@ -248,13 +242,13 @@ diff = await object.diffVersions(versions);
 decide = diff.next.filter((filename) => !filename.match(/repo-metadata/));
 ```
 
-4.  Decide what to do based on the diff - continue with the commit
+3.  Decide what to do based on the diff - continue with the commit
 
 ```
 await object.commit({ inventory });
 ```
 
-5. Decide what to do based on the diff - abort the commit
+4. Decide what to do based on the diff - abort the commit
 
 ```
 await object.cleanup();
