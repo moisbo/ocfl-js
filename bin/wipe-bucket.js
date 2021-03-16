@@ -31,8 +31,8 @@ const {
     });
     await client.send(command);
 
-    if (objects.ContinuationToken) {
-      ContinuationToken = objects.ContinuationToken;
+    if (objects.NextContinuationToken) {
+      ContinuationToken = objects.NextContinuationToken;
     } else {
       walk = false;
     }
