@@ -36,13 +36,7 @@ This library can work with OCFL repositories on disk (filesystem backend) or in 
 
 # Installation
 
-1. Get the code:
-   `git clone https://github.com/CoEDL/ocfl-js`
-2. Install it
-   ```
-   cd ocfl-js
-   npm install
-   ```
+`npm install --save @coedl/ocfl`
 
 # Running the tests
 
